@@ -1,3 +1,4 @@
+// src/main/java/com/example/planner/dto/ItemDTO.java
 package com.example.planner.dto;
 
 import lombok.Data;
@@ -6,7 +7,7 @@ import java.time.Instant;
 
 @Data
 public class ItemDTO {
-  private Long id;
+  private Integer id;
   private String name;
   private String description;
   private boolean completed;
