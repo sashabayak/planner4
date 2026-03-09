@@ -58,45 +58,38 @@ public class GroupService {
 
   @Transactional
   public void createGroupWithUserWithTransaction(GroupDTO groupDto, UserDTO userDto) {
-	LOG.info("TX DEMO - START");
-
-	Group group = GroupMapper.toEntity(groupDto);
-	Group savedGroup = repository.save(group);
-	LOG.info("Saved group id={} name={} (in transaction)", savedGroup.getId(), savedGroup.getName());
-
-	User user = UserMapper.toEntity(userDto);
-	user.setGroup(savedGroup);
-	User savedUser = userRepository.save(user);
-	LOG.info("Saved user id={} name={} (in transaction)", savedUser.getId(), savedUser.getName());
-
-	if (savedUser.getId() == 12 || savedUser.getId() == 10 || savedUser.getId() == 15) {
-	  String errorMessage = "Демонстрационная ошибка: пользователь с ID " + savedUser.getId() + " запрещен";
-	  LOG.error("TX DEMO - ERROR: {}", errorMessage);
-	  throw new IllegalStateException(errorMessage);
-	}
-
-	LOG.info("TX DEMO - END (committed)");
+	processGroupUserCreation(groupDto, userDto, "TX", true);
   }
 
   public void createGroupWithUserWithoutTransaction(GroupDTO groupDto, UserDTO userDto) {
-	LOG.info("NO-TX DEMO - START");
+	processGroupUserCreation(groupDto, userDto, "NO-TX", false);
+  }
+
+  private void processGroupUserCreation(GroupDTO groupDto, UserDTO userDto, String type, boolean isTransactional) {
+	LOG.info("{} DEMO - START", type);
 
 	Group group = GroupMapper.toEntity(groupDto);
 	Group savedGroup = repository.save(group);
-	LOG.info("Saved group id={} name={} (immediately in DB)", savedGroup.getId(), savedGroup.getName());
+	LOG.info("Saved group id={} name={} ({} in DB)",
+		savedGroup.getId(), savedGroup.getName(),
+		isTransactional ? "in transaction" : "immediately");
 
 	User user = UserMapper.toEntity(userDto);
 	user.setGroup(savedGroup);
 	User savedUser = userRepository.save(user);
-	LOG.info("Saved user id={} name={} (immediately in DB)", savedUser.getId(), savedUser.getName());
+	LOG.info("Saved user id={} name={} ({} in DB)",
+		savedUser.getId(), savedUser.getName(),
+		isTransactional ? "in transaction" : "immediately");
 
+	// Условие для ошибки
 	if (savedUser.getId() == 5 || savedUser.getId() == 10 || savedUser.getId() == 15) {
 	  String errorMessage = "Демонстрационная ошибка: пользователь с ID " + savedUser.getId() + " запрещен";
-	  LOG.error("NO-TX DEMO - ERROR: {}", errorMessage);
+	  LOG.error("{} DEMO - ERROR: {}", type, errorMessage);
 	  throw new IllegalStateException(errorMessage);
 	}
 
-	LOG.info("NO-TX DEMO - END (success)");
+	String endStatus = isTransactional ? "committed" : "success";
+	LOG.info("{} DEMO - END ({})", type, endStatus);
   }
 
   public Optional<GroupDTO> update(Integer id, GroupDTO dto) {
