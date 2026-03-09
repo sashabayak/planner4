@@ -1,32 +1,28 @@
-// src/main/java/com/example/planner/controller/GroupController.java
 package com.example.planner.controller;
 
-import com.example.planner.dto.GroupDTO;
-import com.example.planner.service.GroupService;
-import lombok.RequiredArgsConstructor;
-import com.example.planner.dto.UserDTO;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import com.example.planner.dto.GroupWithUserRequest;
 import java.util.List;
 
-@RestController//аннотация Spring, которая помечает класс как контроллер,
-               // обрабатывающий HTTP запросы и возвращающий данные в формате JSON/XML (не HTML страницы)
-@RequestMapping("/api/groups")
-@RequiredArgsConstructor // аннотация ломбок, которая автоматически генерирует конструктор для всех final полей и полей с аннотацией @NonNull
-public class GroupController {
-  private final GroupService service;// значение устанавливается один раз и не меняется
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-  // public GroupController(GroupService service) {
-  //     this.service = service;
-  // }
+import com.example.planner.dto.GroupWithUserRequest;
+import com.example.planner.dto.GroupDTO;
+import com.example.planner.service.GroupService;
+
+@RestController
+
+@RequestMapping("/api/groups")
+@RequiredArgsConstructor
+public class GroupController {
+  private final GroupService service;
 
   @GetMapping
   public List<GroupDTO> getGroups() {

@@ -1,4 +1,3 @@
-// src/main/java/com/example/planner/dto/ItemDTO.java
 package com.example.planner.dto;
 
 import lombok.Data;

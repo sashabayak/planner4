@@ -1,4 +1,3 @@
-// src/main/java/com/example/planner/entity/User.java
 package com.example.planner.entity;
 
 import jakarta.persistence.*;
@@ -15,7 +14,7 @@ import java.util.List;
 @Table(name = "users")
 public class User {
   @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer id;
   private String name;
   private Instant birthDate = Instant.now();

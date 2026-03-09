@@ -1,4 +1,3 @@
-// src/main/java/com/example/planner/repository/TagRepository.java
 package com.example.planner.repository;
 
 import com.example.planner.entity.Tag;

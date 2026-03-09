@@ -1,4 +1,3 @@
-// src/main/java/com/example/planner/entity/Role.java
 package com.example.planner.entity;
 
 import jakarta.persistence.*;
@@ -14,7 +13,7 @@ import java.util.List;
 @Table(name = "roles")
 public class Role {
   @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer id;
   private String name;
 

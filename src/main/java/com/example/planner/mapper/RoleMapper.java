@@ -1,4 +1,3 @@
-// src/main/java/com/example/planner/mapper/RoleMapper.java
 package com.example.planner.mapper;
 
 import com.example.planner.dto.RoleDTO;

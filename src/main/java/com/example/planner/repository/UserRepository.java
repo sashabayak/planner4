@@ -1,16 +1,9 @@
-// src/main/java/com/example/planner/repository/UserRepository.java
 package com.example.planner.repository;
 
 import com.example.planner.entity.User;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import java.util.List;
-//
-//public interface UserRepository extends JpaRepository<User, Integer> {
-//  @EntityGraph(attributePaths = {"items"})
-//  List<User> findAllWithItems();
-//}
 
 public interface UserRepository extends JpaRepository<User, Integer> {
 

@@ -1,6 +1,5 @@
-// src/main/java/com/example/planner/dto/UserDTO.java
 package com.example.planner.dto;
-
+import java.util.List;
 import lombok.Data;
 
 import java.time.Instant;
@@ -12,4 +11,5 @@ public class UserDTO {
   private Instant birthDate;
   private Integer roleId;
   private Integer groupId;
+  private List<ItemDTO> items;
 }

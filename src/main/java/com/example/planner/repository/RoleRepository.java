@@ -1,4 +1,3 @@
-// src/main/java/com/example/planner/repository/RoleRepository.java
 package com.example.planner.repository;
 
 import com.example.planner.entity.Role;

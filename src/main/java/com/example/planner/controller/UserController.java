@@ -1,4 +1,3 @@
-// src/main/java/com/example/planner/controller/UserController.java
 package com.example.planner.controller;
 
 import com.example.planner.dto.UserDTO;
@@ -40,6 +39,18 @@ public class UserController {
   @PostMapping
   public UserDTO addUser(@RequestBody UserDTO dto) {
 	return service.save(dto);
+  }
+
+  @PostMapping("/{userId}/items/{itemId}")
+  public ResponseEntity<String> addItemToUser(
+	  @PathVariable Integer userId,
+	  @PathVariable Integer itemId) {
+	try {
+	  service.addItemToUser(userId, itemId);
+	  return ResponseEntity.ok("Задача добавлена пользователю");
+	} catch (Exception e) {
+	  return ResponseEntity.badRequest().body(e.getMessage());
+	}
   }
 
   @DeleteMapping("/{id}")

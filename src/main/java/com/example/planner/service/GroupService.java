@@ -1,4 +1,3 @@
-// src/main/java/com/example/planner/service/GroupService.java
 package com.example.planner.service;
 
 import com.example.planner.dto.GroupDTO;
@@ -12,8 +11,6 @@ import com.example.planner.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
@@ -59,29 +56,23 @@ public class GroupService {
 	throw new RuntimeException("Simulated error without rollback");
   }
 
-  // Добавьте эту константу в начало класса (после других полей)
   private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GroupService.class);
-
-// ========== МЕТОДЫ ДЛЯ ДЕМОНСТРАЦИИ ТРАНЗАКЦИЙ ==========
 
   @Transactional
   public void createGroupWithUserWithTransaction(GroupDTO groupDto, UserDTO userDto) {
 	LOG.info("TX DEMO - START");
 
-	// Создаем и сохраняем группу
 	Group group = GroupMapper.toEntity(groupDto);
 	Group savedGroup = repository.save(group);
 	LOG.info("Saved group id={} name={} (in transaction)", savedGroup.getId(), savedGroup.getName());
 
-	// Создаем и сохраняем пользователя
 	User user = UserMapper.toEntity(userDto);
 	user.setGroup(savedGroup);
 	User savedUser = userRepository.save(user);
 	LOG.info("Saved user id={} name={} (in transaction)", savedUser.getId(), savedUser.getName());
 
-	// УСЛОВИЕ: если ID группы равен 5, 10 или 15
-	if (savedUser.getId() == 5 || savedUser.getId() == 10 || savedUser.getId() == 15) {
-	  String errorMessage = "Демонстрационная ошибка: группа с ID " + savedGroup.getId() + " запрещена";
+	if (savedUser.getId() == 12 || savedUser.getId() == 10 || savedUser.getId() == 15) {
+	  String errorMessage = "Демонстрационная ошибка: пользователь с ID " + savedUser.getId() + " запрещен";
 	  LOG.error("TX DEMO - ERROR: {}", errorMessage);
 	  throw new RuntimeException(errorMessage);
 	}
@@ -92,20 +83,17 @@ public class GroupService {
   public void createGroupWithUserWithoutTransaction(GroupDTO groupDto, UserDTO userDto) {
 	LOG.info("NO-TX DEMO - START");
 
-	// Создаем и сохраняем группу
 	Group group = GroupMapper.toEntity(groupDto);
 	Group savedGroup = repository.save(group);
 	LOG.info("Saved group id={} name={} (immediately in DB)", savedGroup.getId(), savedGroup.getName());
 
-	// Создаем и сохраняем пользователя
 	User user = UserMapper.toEntity(userDto);
 	user.setGroup(savedGroup);
 	User savedUser = userRepository.save(user);
 	LOG.info("Saved user id={} name={} (immediately in DB)", savedUser.getId(), savedUser.getName());
 
-	// УСЛОВИЕ: если ID группы равен 5, 10 или 15
 	if (savedUser.getId() == 5 || savedUser.getId() == 10 || savedUser.getId() == 15) {
-	  String errorMessage = "Демонстрационная ошибка: группа с ID " + savedGroup.getId() + " запрещена";
+	  String errorMessage = "Демонстрационная ошибка: пользователь с ID " + savedUser.getId() + " запрещен";
 	  LOG.error("NO-TX DEMO - ERROR: {}", errorMessage);
 	  throw new RuntimeException(errorMessage);
 	}

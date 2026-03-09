@@ -1,8 +1,8 @@
-// src/main/java/com/example/planner/mapper/UserMapper.java
 package com.example.planner.mapper;
 
 import com.example.planner.dto.UserDTO;
 import com.example.planner.entity.User;
+import java.util.stream.Collectors;
 
 public class UserMapper {
   private UserMapper() {}
@@ -13,6 +13,14 @@ public class UserMapper {
 	dto.setId(user.getId());
 	dto.setName(user.getName());
 	dto.setBirthDate(user.getBirthDate());
+	if (user.getGroup() != null) {
+	  dto.setGroupId(user.getGroup().getId());
+	}
+	if (user.getItems() != null) {
+	  dto.setItems(user.getItems().stream()
+		  .map(ItemMapper::toDto)
+		  .collect(Collectors.toList()));
+	}
 	return dto;
   }
 
