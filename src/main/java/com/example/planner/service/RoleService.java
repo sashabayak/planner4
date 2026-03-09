@@ -17,7 +17,7 @@ public class RoleService {
   private final RoleRepository repository;
 
   public List<RoleDTO> findAll() {
-	return repository.findAll().stream().map(RoleMapper::toDto).collect(Collectors.toList());
+	return repository.findAll().stream().map(RoleMapper::toDto).toList();
   }
 
   public Optional<RoleDTO> findById(Integer id) {
