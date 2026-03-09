@@ -1,7 +1,7 @@
 package com.example.planner.dto;
+
 import java.util.List;
 import lombok.Data;
-
 import java.time.Instant;
 
 @Data
