@@ -11,6 +11,7 @@ import com.example.planner.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import com.example.planner.exception.DemoTransactionException;
 
 import java.util.List;
 import java.util.Optional;
@@ -44,7 +45,7 @@ public class GroupService {
 	repository.save(group);
 	user.setGroup(group);
 	userRepository.save(user);
-	throw new IllegalStateException("Simulated error for rollback");
+	throw new DemoTransactionException("Simulated error for rollback");
   }
 
   public void saveWithUserNoTx(GroupDTO groupDto, User user) {
