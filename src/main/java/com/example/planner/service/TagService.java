@@ -17,7 +17,7 @@ public class TagService {
   private final TagRepository repository;
 
   public List<TagDTO> findAll() {
-	return repository.findAll().stream().map(TagMapper::toDto).collect(Collectors.toList());
+	return repository.findAll().stream().map(TagMapper::toDto).toList();
   }
 
   public Optional<TagDTO> findById(Integer id) {

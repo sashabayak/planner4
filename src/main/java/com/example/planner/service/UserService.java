@@ -23,17 +23,17 @@ public class UserService {
   private final GroupRepository groupRepository;
   private final ItemRepository itemRepository;
   public List<UserDTO> findAll() {
-	return repository.findAll().stream().map(UserMapper::toDto).collect(Collectors.toList());
+	return repository.findAll().stream().map(UserMapper::toDto).toList();
   }
 
   public List<UserDTO> findAllWithNPlusOne() {
 	List<User> users = repository.findAll();
 	users.forEach(user -> user.getItems().size());
-	return users.stream().map(UserMapper::toDto).collect(Collectors.toList());
+	return users.stream().map(UserMapper::toDto).toList();
   }
 
   public List<UserDTO> findAllWithoutNPlusOne() {
-	return repository.findAllWithItems().stream().map(UserMapper::toDto).collect(Collectors.toList());
+	return repository.findAllWithItems().stream().map(UserMapper::toDto).toList();
   }
 
   public Optional<UserDTO> findById(Integer id) {
