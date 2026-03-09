@@ -52,7 +52,7 @@ public class GroupService {
 	repository.save(group);
 	user.setGroup(group);
 	userRepository.save(user);
-	throw new RuntimeException("Simulated error without rollback");
+	throw new IllegalStateException("Simulated error without rollback");
   }
 
   private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GroupService.class);
@@ -73,7 +73,7 @@ public class GroupService {
 	if (savedUser.getId() == 12 || savedUser.getId() == 10 || savedUser.getId() == 15) {
 	  String errorMessage = "Демонстрационная ошибка: пользователь с ID " + savedUser.getId() + " запрещен";
 	  LOG.error("TX DEMO - ERROR: {}", errorMessage);
-	  throw new RuntimeException(errorMessage);
+	  throw new IllegalStateException(errorMessage);
 	}
 
 	LOG.info("TX DEMO - END (committed)");
@@ -94,7 +94,7 @@ public class GroupService {
 	if (savedUser.getId() == 5 || savedUser.getId() == 10 || savedUser.getId() == 15) {
 	  String errorMessage = "Демонстрационная ошибка: пользователь с ID " + savedUser.getId() + " запрещен";
 	  LOG.error("NO-TX DEMO - ERROR: {}", errorMessage);
-	  throw new RuntimeException(errorMessage);
+	  throw new IllegalStateException(errorMessage);
 	}
 
 	LOG.info("NO-TX DEMO - END (success)");
