@@ -23,8 +23,7 @@ public class GroupService {
   private final UserRepository userRepository;
 
   public List<GroupDTO> findAll() {
-	return repository.findAll().stream().map(GroupMapper::toDto).collect(Collectors.toList());
-  }
+	return repository.findAll().stream().map(GroupMapper::toDto).toList();  }
 
   public Optional<GroupDTO> findById(Integer id) {
 	return repository.findById(id).map(GroupMapper::toDto);
@@ -45,7 +44,7 @@ public class GroupService {
 	repository.save(group);
 	user.setGroup(group);
 	userRepository.save(user);
-	throw new RuntimeException("Simulated error for rollback");
+	throw new IllegalStateException("Simulated error for rollback");
   }
 
   public void saveWithUserNoTx(GroupDTO groupDto, User user) {
