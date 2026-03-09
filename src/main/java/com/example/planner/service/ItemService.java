@@ -17,7 +17,7 @@ public class ItemService {
   private final ItemRepository repository;
 
   public List<ItemDTO> findAll() {
-	return repository.findAll().stream().map(ItemMapper::toDto).collect(Collectors.toList());
+	return repository.findAll().stream().map(ItemMapper::toDto).toList();
   }
 
   public Optional<ItemDTO> findById(Integer id) {
@@ -36,7 +36,7 @@ public class ItemService {
   public List<ItemDTO> searchByName(String name) {
 	String keyword = (name == null || name.trim().isEmpty()) ? "" : name;
 	return repository.findByNameContainingIgnoreCase(keyword)
-		.stream().map(ItemMapper::toDto).collect(Collectors.toList());
+		.stream().map(ItemMapper::toDto).toList();
   }
 
   public Optional<ItemDTO> update(Integer id, ItemDTO dto) {
