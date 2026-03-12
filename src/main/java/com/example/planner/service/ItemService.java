@@ -33,9 +33,6 @@ public class ItemService {
 	return ItemMapper.toDto(repository.save(item));
   }
 
-//  public void deleteById(Integer id) {
-//	repository.deleteById(id);
-//  }
 
   @Transactional
   public void deleteById(Integer id) {
