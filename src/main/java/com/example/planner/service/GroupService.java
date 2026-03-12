@@ -80,8 +80,7 @@ public class GroupService {
 		savedUser.getId(), savedUser.getName(),
 		isTransactional ? "in transaction" : "immediately");
 
-	// Условие для ошибки
-	if (savedUser.getId() == 12 || savedUser.getId() == 10 || savedUser.getId() == 15) {
+	if (savedUser.getId() == 12 || savedUser.getId() == 10 || savedUser.getId() == 16) {
 	  String errorMessage = "Демонстрационная ошибка: пользователь с ID " + savedUser.getId() + " запрещен";
 	  LOG.error("{} DEMO - ERROR: {}", type, errorMessage);
 	  throw new IllegalStateException(errorMessage);
