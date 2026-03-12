@@ -11,6 +11,11 @@ public class GroupMapper {
 	GroupDTO dto = new GroupDTO();
 	dto.setId(group.getId());
 	dto.setName(group.getName());
+	if (group.getUsers() != null) {
+	  dto.setUsers(group.getUsers().stream()
+		  .map(UserMapper::toDto)
+		  .toList());
+	}
 	return dto;
   }
 

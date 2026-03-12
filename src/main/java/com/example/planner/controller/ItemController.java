@@ -23,7 +23,7 @@ public class ItemController {
 
   @GetMapping
   public List<ItemDTO> getItems(@RequestParam(required = false) String name) {
-	return service.searchByName(name);
+	return service.searchByNameWithoutTags(name);  // ← без тегов
   }
 
   @GetMapping("/{id}")
@@ -49,5 +49,25 @@ public class ItemController {
 	return service.update(id, dto)
 		.map(ResponseEntity::ok)
 		.orElseGet(() -> ResponseEntity.notFound().build());
+  }
+  @PostMapping("/{itemId}/tags/{tagId}")
+  public ResponseEntity<String> addTagToItem(
+	  @PathVariable Integer itemId,
+	  @PathVariable Integer tagId) {
+	try {
+	  service.addTagToItem(itemId, tagId);
+	  return ResponseEntity.ok("Тег добавлен задаче");
+	} catch (Exception e) {
+	  return ResponseEntity.badRequest().body(e.getMessage());
+	}
+  }
+  @GetMapping("/with-tags")
+  public List<ItemDTO> getItemsWithTags() {
+	return service.findAllWithTags();
+  }
+
+  @GetMapping("/tag/{tagId}")
+  public List<ItemDTO> getItemsByTag(@PathVariable Integer tagId) {
+	return service.findItemsByTag(tagId);
   }
 }

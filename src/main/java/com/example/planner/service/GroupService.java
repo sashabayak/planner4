@@ -81,7 +81,7 @@ public class GroupService {
 		isTransactional ? "in transaction" : "immediately");
 
 	// Условие для ошибки
-	if (savedUser.getId() == 5 || savedUser.getId() == 10 || savedUser.getId() == 15) {
+	if (savedUser.getId() == 12 || savedUser.getId() == 10 || savedUser.getId() == 15) {
 	  String errorMessage = "Демонстрационная ошибка: пользователь с ID " + savedUser.getId() + " запрещен";
 	  LOG.error("{} DEMO - ERROR: {}", type, errorMessage);
 	  throw new IllegalStateException(errorMessage);
@@ -97,5 +97,24 @@ public class GroupService {
 		  group.setName(dto.getName());
 		  return GroupMapper.toDto(repository.save(group));
 		});
+  }
+  public List<GroupDTO> findAllWithUsers() {
+	return repository.findAllWithUsers().stream()
+		.map(GroupMapper::toDto)
+		.toList();
+  }
+
+  public Optional<GroupDTO> findByIdWithUsers(Integer id) {
+	return repository.findByIdWithUsers(id)
+		.map(GroupMapper::toDto);
+  }
+  public List<GroupDTO> findAllWithoutUsers() {
+	return repository.findAll().stream()
+		.map(group -> {
+		  GroupDTO dto = GroupMapper.toDto(group);
+		  dto.setUsers(null);  // ← убираем пользователей
+		  return dto;
+		})
+		.toList();
   }
 }

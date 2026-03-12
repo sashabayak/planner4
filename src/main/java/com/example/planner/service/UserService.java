@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
+import com.example.planner.entity.Role;
+import com.example.planner.repository.RoleRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +22,7 @@ public class UserService {
   private final UserRepository repository;
   private final GroupRepository groupRepository;
   private final ItemRepository itemRepository;
+  private final RoleRepository roleRepository;
   public List<UserDTO> findAll() {
 	return repository.findAll().stream().map(UserMapper::toDto).toList();
   }
@@ -31,7 +34,9 @@ public class UserService {
   }
 
   public List<UserDTO> findAllWithoutNPlusOne() {
-	return repository.findAllWithItems().stream().map(UserMapper::toDto).toList();
+	return repository.findAllWithItems().stream()
+		.map(UserMapper::toDtoWithoutExtra)  // ← используем новый метод
+		.toList();
   }
 
   public Optional<UserDTO> findById(Integer id) {
@@ -71,5 +76,28 @@ public class UserService {
 
 	user.getItems().add(item);
 	repository.save(user);
+  }
+
+
+  @Transactional
+  public void addRoleToUser(Integer userId, Integer roleId) {
+	User user = repository.findById(userId)
+		.orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+
+	Role role = roleRepository.findById(roleId)
+		.orElseThrow(() -> new RuntimeException("Role not found with id: " + roleId));
+
+	user.setRole(role);
+	repository.save(user);
+  }
+
+  public List<UserDTO> findAllWithoutItems() {
+	return repository.findAll().stream()
+		.map(user -> {
+		  UserDTO dto = UserMapper.toDto(user);
+		  dto.setItems(null);  // ← убираем задачи
+		  return dto;
+		})
+		.toList();
   }
 }

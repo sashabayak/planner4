@@ -15,9 +15,8 @@ public class UserController {
 
   @GetMapping
   public List<UserDTO> getUsers() {
-	return service.findAll();
+	return service.findAllWithoutItems();
   }
-
   @GetMapping("/with-nplusone")
   public List<UserDTO> getUsersWithNPlusOne() {
 	return service.findAllWithNPlusOne();
@@ -63,5 +62,17 @@ public class UserController {
 	return service.update(id, dto)
 		.map(ResponseEntity::ok)
 		.orElseGet(() -> ResponseEntity.notFound().build());
+  }
+
+  @PostMapping("/{userId}/roles/{roleId}")
+  public ResponseEntity<String> addRoleToUser(
+	  @PathVariable Integer userId,
+	  @PathVariable Integer roleId) {
+	try {
+	  service.addRoleToUser(userId, roleId);
+	  return ResponseEntity.ok("Роль добавлена пользователю");
+	} catch (Exception e) {
+	  return ResponseEntity.badRequest().body(e.getMessage());
+	}
   }
 }

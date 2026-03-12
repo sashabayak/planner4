@@ -1,9 +1,7 @@
 package com.example.planner.controller;
 
 import java.util.List;
-
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,7 +11,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.example.planner.dto.GroupDTO;
 import com.example.planner.dto.GroupWithUserRequest;
 import com.example.planner.service.GroupService;
@@ -26,7 +23,7 @@ public class GroupController {
 
   @GetMapping
   public List<GroupDTO> getGroups() {
-	return service.findAll();
+	return service.findAllWithoutUsers();
   }
 
   @GetMapping("/{id}")
@@ -72,6 +69,17 @@ public class GroupController {
   @PutMapping("/{id}")
   public ResponseEntity<GroupDTO> updateGroup(@PathVariable Integer id, @RequestBody GroupDTO dto) {
 	return service.update(id, dto)
+		.map(ResponseEntity::ok)
+		.orElseGet(() -> ResponseEntity.notFound().build());
+  }
+  @GetMapping("/with-users")
+  public List<GroupDTO> getGroupsWithUsers() {
+	return service.findAllWithUsers();
+  }
+
+  @GetMapping("/{id}/with-users")
+  public ResponseEntity<GroupDTO> getGroupWithUsersById(@PathVariable Integer id) {
+	return service.findByIdWithUsers(id)
 		.map(ResponseEntity::ok)
 		.orElseGet(() -> ResponseEntity.notFound().build());
   }

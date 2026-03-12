@@ -1,9 +1,11 @@
 package com.example.planner.service;
 
 import com.example.planner.dto.TagDTO;
+import com.example.planner.entity.Item;
 import com.example.planner.entity.Tag;
 import com.example.planner.mapper.TagMapper;
 import com.example.planner.repository.TagRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -27,10 +29,18 @@ public class TagService {
 	return TagMapper.toDto(repository.save(tag));
   }
 
+  @Transactional
   public void deleteById(Integer id) {
+	Tag tag = repository.findById(id)
+		.orElseThrow(() -> new RuntimeException("Tag not found with id: " + id));
+	for (Item item : tag.getItems()) {
+	  item.getTags().remove(tag);
+	}
+	tag.getItems().clear();
+
+	repository.save(tag);
 	repository.deleteById(id);
   }
-
   public Optional<TagDTO> update(Integer id, TagDTO dto) {
 	return repository.findById(id)
 		.map(tag -> {

@@ -14,9 +14,24 @@ public class ItemMapper {
 	dto.setDescription(item.getDescription());
 	dto.setCompleted(item.isCompleted());
 	dto.setCreatedAt(item.getCreatedAt());
+	if (item.getTags() != null) {
+	  dto.setTags(item.getTags().stream()
+		  .map(TagMapper::toDto)
+		  .toList());
+	}
 	return dto;
   }
-
+  public static ItemDTO toDtoWithoutTags(Item item) {
+	if (item == null) return null;
+	ItemDTO dto = new ItemDTO();
+	dto.setId(item.getId());
+	dto.setName(item.getName());
+	dto.setDescription(item.getDescription());
+	dto.setCompleted(item.isCompleted());
+	dto.setCreatedAt(item.getCreatedAt());
+	// НЕ копируем tags!
+	return dto;
+  }
   public static Item toEntity(ItemDTO dto) {
 	if (dto == null) return null;
 	Item item = new Item();
