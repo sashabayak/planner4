@@ -1,7 +1,7 @@
 package com.example.planner.mapper;
 
-import com.example.planner.dto.TagDTO;
 import com.example.planner.entity.Tag;
+import com.example.planner.dto.tag.TagDTO;
 
 public class TagMapper {
   private TagMapper() {}

@@ -1,11 +1,11 @@
 package com.example.planner.controller;
 
-import com.example.planner.dto.TagDTO;
 import com.example.planner.service.TagService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import com.example.planner.dto.tag.TagDTO;
 
 @RestController
 @RequestMapping("/api/tags")

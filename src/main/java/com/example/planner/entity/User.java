@@ -11,9 +11,11 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,12 +23,14 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @Table(name = "users")
+@AllArgsConstructor
+@Builder
 public class User {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Integer id;
+  private long id;
   private String name;
-  private Instant birthDate = Instant.now();
+  private LocalDate birthDate = LocalDate.now();
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "group_id")
@@ -42,7 +46,4 @@ public class User {
 	  inverseJoinColumns = @JoinColumn(name = "item_id"))
   private List<Item> items = new ArrayList<>();
 
-  public User(String name) {
-	this.name = name;
-  }
 }

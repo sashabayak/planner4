@@ -1,59 +1,83 @@
 package com.example.planner.mapper;
 
-import com.example.planner.dto.UserDTO;
+import com.example.planner.dto.user.UserDTO;
+import com.example.planner.dto.user.UserCreateDTO;
+import com.example.planner.entity.Group;
+import com.example.planner.entity.Role;
 import com.example.planner.entity.User;
-import java.util.stream.Collectors;
+import org.springframework.stereotype.Component;
 
+@Component
 public class UserMapper {
-  private UserMapper() {}
 
-  public static UserDTO toDto(User user) {
-	if (user == null) return null;
-	UserDTO dto = new UserDTO();
-	dto.setId(user.getId());
-	dto.setName(user.getName());
-	dto.setBirthDate(user.getBirthDate());
-	if (user.getGroup() != null) {
-	  dto.setGroupId(user.getGroup().getId());
+  public UserDTO toDto(User user) {
+	if (user == null) {
+	  return null;
 	}
-	if (user.getItems() != null) {
-	  dto.setItems(user.getItems().stream()
-		  .map(ItemMapper::toDto)
-		  .collect(Collectors.toList()));
-	}
-	if (user.getRole() != null) {
-	  dto.setRoleId(user.getRole().getId());
-	}
-	return dto;
-  }
-  public static UserDTO toDtoWithoutExtra(User user) {
-	if (user == null) return null;
-	UserDTO dto = new UserDTO();
-	dto.setId(user.getId());
-	dto.setName(user.getName());
-	dto.setBirthDate(user.getBirthDate());
+
+	UserDTO.UserDTOBuilder builder = UserDTO.builder()
+		.id(user.getId())
+		.name(user.getName())
+		.birthDate(user.getBirthDate());
 
 	if (user.getGroup() != null) {
-	  dto.setGroupId(user.getGroup().getId());
+	  builder.groupId(user.getGroup().getId())
+		  .groupName(user.getGroup().getName());
 	}
+
 	if (user.getRole() != null) {
-	  dto.setRoleId(user.getRole().getId());
+	  builder.roleId(user.getRole().getId())
+		  .roleName(user.getRole().getName());
 	}
 
-	if (user.getItems() != null) {
-	  dto.setItems(user.getItems().stream()
-		  .map(ItemMapper::toDtoWithoutTags)  // ← используем метод без тегов
-		  .toList());
+	return builder.build();
+  }
+
+  public User toEntity(UserCreateDTO createDTO, Role role, Group group) {
+	if (createDTO == null) {
+	  return null;
 	}
 
-	return dto;
+	User.UserBuilder builder = User.builder()
+		.name(createDTO.getName())
+		.birthDate(createDTO.getBirthDate())
+		.role(role)
+		.group(group);
+
+	return builder.build();
   }
-  public static User toEntity(UserDTO dto) {
-	if (dto == null) return null;
-	User user = new User();
-	user.setId(dto.getId());
-	user.setName(dto.getName());
-	user.setBirthDate(dto.getBirthDate());
-	return user;
-  }
+
 }
+//	if (user.getGroup() != null) {
+//	  dto.setGroupId(user.getGroup().getId());
+//	}
+//	if (user.getItems() != null) {
+//	  dto.setItems(user.getItems().stream()
+//		  .map(ItemMapper::toDto)
+//		  .collect(Collectors.toList()));
+//	}
+//	if (user.getRole() != null) {
+//	  dto.setRoleId(user.getRole().getId());
+//	}
+//	return dto;
+//  }
+//  public static UserDTO toDtoWithoutExtra(User user) {
+//	if (user == null) return null;
+//	UserDTO dto = new UserDTO();
+//	dto.setId(user.getId());
+//	dto.setName(user.getName());
+//	dto.setBirthDate(user.getBirthDate());
+
+//	if (user.getGroup() != null) {
+//	  dto.setGroupId(user.getGroup().getId());
+//	}
+//	if (user.getRole() != null) {
+//	  dto.setRoleId(user.getRole().getId());
+//	}
+
+//	if (user.getItems() != null) {
+//	  dto.setItems(user.getItems().stream()
+//		  .map(ItemMapper::toDtoWithoutTags)  // ← используем метод без тегов
+//		  .toList());
+//	}
+

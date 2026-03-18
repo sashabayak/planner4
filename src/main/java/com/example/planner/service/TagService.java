@@ -1,6 +1,5 @@
 package com.example.planner.service;
 
-import com.example.planner.dto.TagDTO;
 import com.example.planner.entity.Item;
 import com.example.planner.entity.Tag;
 import com.example.planner.mapper.TagMapper;
@@ -10,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
+import com.example.planner.dto.tag.TagDTO;
 
 @Service
 @RequiredArgsConstructor
