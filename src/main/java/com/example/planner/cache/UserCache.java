@@ -6,13 +6,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashMap;
 
 @Slf4j
 @Component
 public class UserCache {
 
-  private final ConcurrentHashMap<UserQueryKey, Page<UserDTO>> cache = new ConcurrentHashMap<>();
+  private final HashMap<UserQueryKey, Page<UserDTO>> cache = new HashMap<>();
 
   @PostConstruct
   public void init() {
