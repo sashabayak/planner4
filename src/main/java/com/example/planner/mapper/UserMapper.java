@@ -46,38 +46,6 @@ public class UserMapper {
 
 	return builder.build();
   }
-
 }
-//	if (user.getGroup() != null) {
-//	  dto.setGroupId(user.getGroup().getId());
-//	}
-//	if (user.getItems() != null) {
-//	  dto.setItems(user.getItems().stream()
-//		  .map(ItemMapper::toDto)
-//		  .collect(Collectors.toList()));
-//	}
-//	if (user.getRole() != null) {
-//	  dto.setRoleId(user.getRole().getId());
-//	}
-//	return dto;
-//  }
-//  public static UserDTO toDtoWithoutExtra(User user) {
-//	if (user == null) return null;
-//	UserDTO dto = new UserDTO();
-//	dto.setId(user.getId());
-//	dto.setName(user.getName());
-//	dto.setBirthDate(user.getBirthDate());
 
-//	if (user.getGroup() != null) {
-//	  dto.setGroupId(user.getGroup().getId());
-//	}
-//	if (user.getRole() != null) {
-//	  dto.setRoleId(user.getRole().getId());
-//	}
-
-//	if (user.getItems() != null) {
-//	  dto.setItems(user.getItems().stream()
-//		  .map(ItemMapper::toDtoWithoutTags)  // ← используем метод без тегов
-//		  .toList());
-//	}
 

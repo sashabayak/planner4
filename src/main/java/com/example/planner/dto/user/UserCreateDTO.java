@@ -21,7 +21,7 @@ public class UserCreateDTO {
   @NotNull(message = "Дата рождения обязательна")
   private LocalDate birthDate;
 
-  @NotNull(message = "ID пользователя обязателен")
+  @NotNull(message = "ID роли обязателен")
   private Long roleId;
 
   @NotNull(message = "ID группы обязателен")

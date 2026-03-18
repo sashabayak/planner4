@@ -172,8 +172,8 @@ public class UserService {
 	LOG.info("Поиск пользователей с фильтрацией (Native Query)");
 
 	List<User> users = repository.findUsersWithFiltersNative(
-		filter.groupName(),
-		filter.roleName()
+		filter.roleName(),
+		filter.groupName()
 	);
 
 	LOG.info("Найдено пользователей: {}", users.size());
@@ -275,7 +275,7 @@ public class UserService {
 
 	LOG.info("Сохранен пользователь id={} имя={} ({})", saved.getId(), saved.getName(), type);
 
-	if (dto.getGroupId() == 3) {  // или другая демо-логика
+	if (dto.getGroupId() == 3) {
 	  String errorMessage = "Демонстрационная ошибка: группа с ID=3 запрещена";
 	  LOG.error("{} ДЕМО - ОШИБКА: {}", type, errorMessage);
 	  throw new IllegalStateException(errorMessage);
@@ -305,105 +305,3 @@ public class UserService {
 		.build();
   }
 }
-//package com.example.planner.service;
-//
-//import com.example.planner.entity.User;
-//import com.example.planner.mapper.UserMapper;
-//import com.example.planner.repository.UserRepository;
-//import com.example.planner.repository.GroupRepository;
-//import com.example.planner.entity.Item;
-//import com.example.planner.repository.ItemRepository;
-//import org.springframework.transaction.annotation.Transactional;
-//import lombok.RequiredArgsConstructor;
-//import org.springframework.stereotype.Service;
-//import java.util.List;
-//import java.util.Optional;
-//import com.example.planner.entity.Role;
-//import com.example.planner.repository.RoleRepository;
-//import com.example.planner.dto.user.UserDTO;
-//
-//@Service
-//@RequiredArgsConstructor
-//public class UserService {
-//  private final UserRepository repository;
-//  private final GroupRepository groupRepository;
-//  private final ItemRepository itemRepository;
-//  private final RoleRepository roleRepository;
-//  public List<UserDTO> findAll() {
-//	return repository.findAll().stream().map(UserMapper::toDto).toList();
-//  }
-//
-//  public List<UserDTO> findAllWithNPlusOne() {
-//	List<User> users = repository.findAll();
-//	users.forEach(user -> user.getItems().size());
-//	return users.stream().map(UserMapper::toDto).toList();
-//  }
-
-//  public List<UserDTO> findAllWithoutNPlusOne() {
-//	return repository.findAllWithItems().stream()
-//		.map(UserMapper::toDtoWithoutExtra)  // ← используем новый метод
-//		.toList();
-//  }
-
-//  public Optional<UserDTO> findById(Integer id) {
-//	return repository.findById(id).map(UserMapper::toDto);
-//  }
-//
-//  public UserDTO save(UserDTO dto) {
-//	User user = UserMapper.toEntity(dto);
-
-//	if (dto.getGroupId() != null) {
-//	  Group group = groupRepository.findById(dto.getGroupId())
-//		  .orElseThrow(() -> new RuntimeException("Group not found"));
-//	  user.setGroup(group);
-//	}
-
-//	User savedUser = repository.save(user);
-//	return UserMapper.toDto(savedUser);
-//  }
-//  public Optional<UserDTO> update(Integer id, UserDTO dto) {
-//	return repository.findById(id)
-//		.map(user -> {
-//		  user.setName(dto.getName());
-//		  user.setBirthDate(dto.getBirthDate());
-//		  return UserMapper.toDto(repository.save(user));
-//		});
-//  }
-//  public void deleteById(Integer id) {
-//	repository.deleteById(id);
-//  }
-
-//  @Transactional
-//  public void addItemToUser(Integer userId, Integer itemId) {
-//	User user = repository.findById(userId)
-//		.orElseThrow(() -> new RuntimeException("User not found"));
-////	Item item = itemRepository.findById(itemId)
-////		.orElseThrow(() -> new RuntimeException("Item not found"));
-//
-//	user.getItems().add(item);
-//	repository.save(user);
-//  }
-
-
-//  @Transactional
-//  public void addRoleToUser(Integer userId, Integer roleId) {
-//	User user = repository.findById(userId)
-//		.orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
-//
-//	Role role = roleRepository.findById(roleId)
-//		.orElseThrow(() -> new RuntimeException("Role not found with id: " + roleId));
-//
-//	user.setRole(role);
-//	repository.save(user);
-//  }
-
-//  public List<UserDTO> findAllWithoutItems() {
-//	return repository.findAll().stream()
-//		.map(user -> {
-//		  UserDTO dto = UserMapper.toDto(user);
-//		  dto.setItems(null);  // ← убираем задачи
-//		  return dto;
-//		})
-//		.toList();
-//  }
-//}

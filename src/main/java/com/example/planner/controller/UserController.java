@@ -40,7 +40,6 @@ public class UserController {
   @GetMapping("/search-jpql")
   @Operation(summary = "Поиск пользователей через JPQL")
   public ResponseEntity<List<UserDTO>> searchSessionsJpql(
-	  @RequestParam(required = false) String name,
 	  @RequestParam(required = false) String groupName,
 	  @RequestParam(required = false) String roleName) {
 
@@ -55,12 +54,12 @@ public class UserController {
   @GetMapping("/search-native")
   @Operation(summary = "Поиск пользователей через Native Query")
   public ResponseEntity<List<UserDTO>> searchSessionsNative(
-	  @RequestParam(required = false) String roleName,
-	  @RequestParam(required = false) String groupName) {
+	  @RequestParam(required = false) String groupName,
+	  @RequestParam(required = false) String roleName) {
 
 	UserFilterDTO filter = UserFilterDTO.builder()
-		.roleName(roleName)
-		.groupName(groupName)
+		.roleName(groupName)
+		.groupName(roleName)
 		.build();
 
 	return ResponseEntity.ok(userService.getUserWithFiltersNative(filter));
