@@ -49,8 +49,8 @@ public class RoleController {
   })
   public ResponseEntity<RoleDTO> getRoleById(
 	  @Parameter(description = "ID роли", required = true) @PathVariable Long id) {
-	RoleDTO Role = service.getRoleById(id);
-	return Role == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(Role);
+	RoleDTO role = service.getRoleById(id);
+	return role == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(role);
   }
 
   @PostMapping
