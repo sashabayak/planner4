@@ -2,6 +2,12 @@ package com.example.planner.service;
 
 import java.util.List;
 
+import com.example.planner.dto.item.ItemCreateDTO;
+import com.example.planner.dto.item.ItemDTO;
+import com.example.planner.dto.item.ItemUpdateDTO;
+import com.example.planner.entity.Item;
+import com.example.planner.mapper.ItemMapper;
+import com.example.planner.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class LoggingAspect {
-  @Pointcut("execution(* com.example.photostudio.service.*.*(..))")
+  @Pointcut("execution(* com.example.planner.service.*.*(..))")
   public void serviceMethods() {
   }
 

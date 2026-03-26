@@ -50,7 +50,7 @@
         </rollingPolicy>
     </appender>
 
-    <logger name="com.restaurant.bookingservice" level="DEBUG"/>
+    <logger name="com.example.planner" level="DEBUG"/>
     <logger name="org.springframework" level="INFO"/>
     <logger name="org.hibernate.SQL" level="DEBUG"/>
     <logger name="org.hibernate.orm.jdbc.bind" level="TRACE"/>
