@@ -30,7 +30,7 @@ public class ItemMapper {
 	return Item.builder()
 		.name(item.getName())
 		.description(item.getDescription())
-		.completed(item.getCompleted() != null ? item.getCompleted() : false)
+		.completed(Boolean.TRUE.equals(item.getCompleted()))
 		.build();
   }
 }
