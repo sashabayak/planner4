@@ -1,10 +1,10 @@
 package com.example.planner.mapper;
 
-import com.example.planner.entity.Group;
-import com.example.planner.dto.group.GroupDTO;
 import com.example.planner.dto.group.GroupCreateDTO;
-import org.springframework.stereotype.Component;
+import com.example.planner.dto.group.GroupDTO;
+import com.example.planner.entity.Group;
 
+import org.springframework.stereotype.Component;
 @Component
 public class GroupMapper {
 

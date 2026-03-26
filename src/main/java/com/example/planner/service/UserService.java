@@ -6,13 +6,16 @@ import com.example.planner.dto.user.UserCreateDTO;
 import com.example.planner.dto.user.UserDTO;
 import com.example.planner.dto.user.UserFilterDTO;
 import com.example.planner.dto.user.UserUpdateDTO;
-import com.example.planner.mapper.UserMapper;
 import com.example.planner.entity.Group;
 import com.example.planner.entity.Role;
 import com.example.planner.entity.User;
+import com.example.planner.mapper.UserMapper;
 import com.example.planner.repository.GroupRepository;
-import com.example.planner.repository.UserRepository;
 import com.example.planner.repository.RoleRepository;
+import com.example.planner.repository.UserRepository;
+
+import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +24,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
@@ -44,6 +46,8 @@ public class UserService {
   private final GroupRepository groupRepository;
   private final RoleRepository roleRepository;
   private final UserCache userCache;
+
+
   public List<UserDTO> getAllUsers() {
 	LOG.info("Получение всех пользователей");
 	return repository.findAll()
@@ -287,13 +291,13 @@ public class UserService {
 
   private Group findGroupById(Long id) {
 	return groupRepository.findById(id)
-		.orElseThrow(() -> new NoSuchElementException("Группа не найдена с id: " + id));
+		.orElseThrow(() -> new NoSuchElementException(GROUP_NOT_FOUND+WITH_ID+ id));
   }
 
 
   private Role findRoleById(Long id) {
 	return roleRepository.findById(id)
-		.orElseThrow(() -> new NoSuchElementException("Роль не найдена с id: " + id));
+		.orElseThrow(() -> new NoSuchElementException(ROLE_NOT_FOUND + WITH_ID + id));
   }
 
   private User buildUser(UserCreateDTO dto, Group group, Role role) {

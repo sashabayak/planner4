@@ -1,9 +1,7 @@
 package com.example.planner.dto.user;
-
+import java.time.LocalDate;
 import jakarta.validation.constraints.Past;
 import lombok.Data;
-
-import java.time.LocalDate;
 
 @Data
 public class UserUpdateDTO {

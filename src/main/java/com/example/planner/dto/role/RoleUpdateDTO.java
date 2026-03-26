@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RoleUpdateDTO {
-  @Size(min = 2, max = 50, message = "Имя должно содержать от 2 до 50 символов")
+  @Size(min = 2, max = 50, message = "Имя роли должно содержать от 2 до 50 символов")
   private String name;
 }

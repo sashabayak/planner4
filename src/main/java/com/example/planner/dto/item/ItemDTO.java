@@ -1,11 +1,10 @@
-package com.example.planner.dto.item;
+package com.example.planner.dto.item; // укажите ваш точный пакет
 
-import lombok.Data;
 import java.time.LocalDateTime;
-import java.util.List;
-import com.example.planner.dto.tag.TagDTO;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data

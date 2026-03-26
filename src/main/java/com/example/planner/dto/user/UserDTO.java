@@ -1,13 +1,10 @@
 package com.example.planner.dto.user;
 
+import java.time.LocalDate;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.List;
-import com.example.planner.dto.item.ItemDTO;
 import lombok.NoArgsConstructor;
 
 @Data

@@ -1,10 +1,13 @@
 package com.example.planner.controller;
 
-import com.example.planner.dto.role.RoleDTO;
-import com.example.planner.dto.role.RoleCreateDTO;
-import com.example.planner.dto.role.RoleUpdateDTO;
 import com.example.planner.dto.ErrorResponse;
+import com.example.planner.dto.role.RoleCreateDTO;
+import com.example.planner.dto.role.RoleDTO;
+import com.example.planner.dto.role.RoleUpdateDTO;
 import com.example.planner.service.RoleService;
+
+import java.util.List;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -23,8 +26,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/roles")
