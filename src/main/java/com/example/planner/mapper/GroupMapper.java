@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class GroupMapper {
 
-  public GroupDTO toDto(Group group) {
+  public static GroupDTO toDto(Group group) {
 	if (group == null) {
 	  return null;
 	}
