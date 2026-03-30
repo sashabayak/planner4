@@ -17,9 +17,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 @Tag(name = "Пользователи", description = "Управление пользователями")
+@Validated
 public class UserController {
   private final UserService userService;
 
@@ -89,8 +92,8 @@ public class UserController {
   public ResponseEntity<Page<UserDTO>> searchSessionsPaginated(
 	  @RequestParam(required = false) String groupName,
 	  @RequestParam(required = false) String roleName,
-	  @RequestParam(defaultValue = "0") @Parameter(description = "Номер страницы") int page,
-	  @RequestParam(defaultValue = "10") @Parameter(description = "Размер страницы") int size,
+	  @RequestParam(defaultValue = "0") @Parameter(description = "Номер страницы") @Min(0 )int page,
+	  @RequestParam(defaultValue = "10") @Parameter(description = "Размер страницы") @Min(1)int size,
 	  @RequestParam(defaultValue = "name") String sortBy,
 	  @RequestParam(defaultValue = "ASC") String sortDirection) {
 
@@ -117,7 +120,7 @@ public class UserController {
   @GetMapping("/group/{groupId}")
   @Operation(summary = "Получить пользователей по ID группы")
   public ResponseEntity<List<UserDTO>> getUsersByGroupId(
-	  @Parameter(description = "ID пользователя", required = true) @PathVariable Long groupId) {
+	  @Parameter(description = "ID пользователя", required = true) @PathVariable @Min(1) Long groupId) {
 	return ResponseEntity.ok(userService.getUsersByGroupId(groupId));
   }
   @GetMapping("/{id}")
@@ -128,9 +131,8 @@ public class UserController {
 		  content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   })
   public ResponseEntity<UserDTO> getUserById(
-	  @Parameter(description = "ID пользователя", required = true) @PathVariable Long id) {
-	UserDTO dto = userService.getUserById(id);
-	return dto != null ? ResponseEntity.ok(dto) : ResponseEntity.notFound().build();
+	  @Parameter(description = "ID пользователя", required = true) @PathVariable @Min(1) Long id) {
+    	return ResponseEntity.ok(userService.getUserById(id));
   }
   @PostMapping
   @Operation(summary = "Добавить пользователя")
@@ -146,14 +148,14 @@ public class UserController {
   @PutMapping("/{id}")
   @Operation(summary = "Обновить пользователя")
   public ResponseEntity<UserDTO> updateUser(
-	  @PathVariable Long id, @Valid @RequestBody UserUpdateDTO updateDto) {
+	  @PathVariable @Min(1) Long id, @Valid @RequestBody UserUpdateDTO updateDto) {
 	UserDTO updated = userService.updateUser(id, updateDto);
 	return updated != null ? ResponseEntity.ok(updated) : ResponseEntity.notFound().build();
   }
 
   @DeleteMapping("/{id}")
   @Operation(summary = "Удалить пользователя")
-  public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+  public ResponseEntity<Void> deleteUser(@Min(1) @PathVariable Long id) {
 	return userService.deleteUser(id)
 		? ResponseEntity.noContent().build()
 		: ResponseEntity.notFound().build();

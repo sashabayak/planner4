@@ -1,4 +1,4 @@
-package com.example.planner.exception;
+package com.example.planner.handler;
 
 import com.example.planner.dto.ErrorResponse;
 

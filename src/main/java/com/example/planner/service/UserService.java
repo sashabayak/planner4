@@ -59,8 +59,7 @@ public class UserService {
 	LOG.info("Получение пользователя по ID: {}", id);
 	return repository.findById(id)
 		.map(mapper::toDto)
-		.orElse(null);
-  }
+		.orElseThrow(() -> new NoSuchElementException("Пользователь с ID " + id + " не найден"));  }
 
   public List<UserDTO> getUsersByGroupId(Long groupId) {
 	LOG.info("Получение пользователей по ID группы: {}", groupId);

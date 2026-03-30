@@ -14,7 +14,7 @@ public class UserCache {
 
   @PostConstruct
   public void init() {
-	log.info("PhotoSessionCache инициализирован с HashMap индексом");
+	log.info("UserCache инициализирован с HashMap индексом");
   }
 
   public Page<UserDTO> get(UserQueryKey key) {
