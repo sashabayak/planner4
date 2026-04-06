@@ -1,6 +1,7 @@
 package com.example.planner.controller;
 
 import com.example.planner.dto.ErrorResponse;
+import com.example.planner.dto.group.GroupBulkCreateDTO;
 import com.example.planner.dto.group.GroupCreateDTO;
 import com.example.planner.dto.group.GroupDTO;
 import com.example.planner.dto.group.GroupUpdateDTO;
@@ -81,7 +82,33 @@ public class GroupController {
         : ResponseEntity.notFound().build();
   }
 
-  //лаба номер 4
+  @PostMapping("/bulk")
+  @Operation(summary = "Массовое создание групп")
+  @ApiResponses(value ={
+      @ApiResponse(responseCode = "200", description = "Группы созданы"),
+      @ApiResponse(responseCode = "400", description = "Ошибка валидации")
+  })
+  public ResponseEntity<List<GroupDTO>> createGroupsBulk(
+      @Valid @RequestBody GroupBulkCreateDTO bulkCreateDTO) {
+    return ResponseEntity.ok(service.createGroupsBulk(bulkCreateDTO.getGroups()));
+  }
 
+  @PostMapping("/bulk/demo/with-transaction")
+  @Operation(summary = "Демонстрация массового создания с транзакцией")
+  public ResponseEntity<List<GroupDTO>> demoBulkWithTransaction(
+      @Valid @RequestBody GroupBulkCreateDTO bulkCreateDto) {
+    List<GroupDTO> createdClients = service.createGroupsBulkWithTransaction(
+        bulkCreateDto.getGroups());
+    return ResponseEntity.ok(createdClients);
+  }
+
+  @PostMapping("/bulk/demo/without-transaction")
+  @Operation(summary = "Демонстрация массового создания без транзакции")
+  public ResponseEntity<List<GroupDTO>> demoBulkWithoutTransaction(
+      @Valid @RequestBody GroupBulkCreateDTO bulkCreateDto) {
+    List<GroupDTO> createdClients = service.createGroupsBulkWithoutTransaction(
+        bulkCreateDto.getGroups());
+    return ResponseEntity.ok(createdClients);
+  }
 }
 
