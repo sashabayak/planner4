@@ -103,7 +103,7 @@ class GroupServiceTest {
   }
 
   @Test
-  void getGroupByIdWhenNotExistsShouldReturnNull() {
+  void getGroupByIdWhenGroupNotExistsShouldReturnNull() {
 	when(groupRepository.findById(NON_EXISTENT_ID)).thenReturn(Optional.empty());
 
 	GroupDTO result = groupService.getGroupById(NON_EXISTENT_ID);
@@ -139,392 +139,169 @@ class GroupServiceTest {
   void updateGroupWhenGroupExistsShouldReturnUpdatedGroup() {
 	Group updatedGroup = Group.builder()
 		.id(ID)
-		.Name(UPDATED_FIRST_NAME)
-		.lastName(UPDATED_LAST_NAME)
-		.phone(UPDATED_PHONE)
-		.email(UPDATED_EMAIL)
+		.name(UPDATED_NAME)
 		.build();
 
-	ClientDto updatedDto = ClientDto.builder()
+	GroupDTO updatedDto = GroupDTO.builder()
 		.id(ID)
-		.firstName(UPDATED_FIRST_NAME)
-		.lastName(UPDATED_LAST_NAME)
-		.phone(UPDATED_PHONE)
-		.email(UPDATED_EMAIL)
+		.name(UPDATED_NAME)
 		.build();
 
-	when(clientRepository.findById(ID)).thenReturn(Optional.of(client));
-	when(clientRepository.save(any(Client.class))).thenReturn(updatedClient);
-	when(clientMapper.toDto(updatedClient)).thenReturn(updatedDto);
+	when(groupRepository.findById(ID)).thenReturn(Optional.of(group));
+	when(groupRepository.save(any(Group.class))).thenReturn(updatedGroup);
+	when(groupMapper.toDto(updatedGroup)).thenReturn(updatedDto);
 
-	ClientDto result = clientService.updateClient(ID, clientUpdateDto);
+	GroupDTO result = groupService.updateGrouop(ID, groupUpdateDto);
 
 	assertThat(result).isNotNull();
-	assertThat(result.getFirstName()).isEqualTo(UPDATED_FIRST_NAME);
-	assertThat(result.getLastName()).isEqualTo(UPDATED_LAST_NAME);
-	assertThat(result.getPhone()).isEqualTo(UPDATED_PHONE);
-	assertThat(result.getEmail()).isEqualTo(UPDATED_EMAIL);
-	verify(clientRepository, times(1)).save(any(Client.class));
+	assertThat(result.getId()).isEqualTo(ID);
+	assertThat(result.getName()).isEqualTo(UPDATED_NAME);
+	verify(groupRepository, times(1)).save(any(Group.class));
   }
 
-  @Test
-  void updateClientWithPartialDataShouldUpdateOnlyProvidedFields() {
-	Client updatedClient = Client.builder()
-		.id(ID)
-		.firstName(FIRST_NAME)
-		.lastName(UPDATED_LAST_NAME)
-		.phone(UPDATED_PHONE)
-		.email(EMAIL)
-		.build();
 
-	ClientDto updatedDto = ClientDto.builder()
-		.id(ID)
-		.firstName(FIRST_NAME)
-		.lastName(UPDATED_LAST_NAME)
-		.phone(UPDATED_PHONE)
-		.email(EMAIL)
-		.build();
-
-	when(clientRepository.findById(ID)).thenReturn(Optional.of(client));
-	when(clientRepository.save(any(Client.class))).thenReturn(updatedClient);
-	when(clientMapper.toDto(updatedClient)).thenReturn(updatedDto);
-
-	ClientDto result = clientService.updateClient(ID, partialUpdateDto);
-
-	assertThat(result).isNotNull();
-	assertThat(result.getFirstName()).isEqualTo(FIRST_NAME);
-	assertThat(result.getLastName()).isEqualTo(UPDATED_LAST_NAME);
-	assertThat(result.getPhone()).isEqualTo(UPDATED_PHONE);
-	assertThat(result.getEmail()).isEqualTo(EMAIL);
-	verify(clientRepository, times(1)).save(any(Client.class));
-  }
 
   @Test
-  void updateClientWhenClientNotExistsShouldReturnNull() {
-	when(clientRepository.findById(NON_EXISTENT_ID)).thenReturn(Optional.empty());
+  void updateGroupWhenGroupNotExistsShouldReturnNull() {
+	when(groupRepository.findById(NON_EXISTENT_ID)).thenReturn(Optional.empty());
 
-	ClientDto result = clientService.updateClient(NON_EXISTENT_ID, clientUpdateDto);
+	GroupDTO result = groupService.updateGroup(NON_EXISTENT_ID, groupUpdateDto);
 
 	assertThat(result).isNull();
-	verify(clientRepository, never()).save(any(Client.class));
+	verify(groupRepository, never()).save(any(Group.class));
   }
 
   @Test
-  void deleteClientWhenClientExistsShouldReturnTrue() {
-	when(clientRepository.existsById(ID)).thenReturn(true);
-	doNothing().when(clientRepository).deleteById(ID);
+  void deleteGroupWhenGroupExistsShouldReturnTrue() {
+	when(groupRepository.existsById(ID)).thenReturn(true);
+	doNothing().when(groupRepository).deleteById(ID);
 
-	boolean result = clientService.deleteClient(ID);
+	boolean result = groupService.deleteGroup(ID);
 
 	assertThat(result).isTrue();
-	verify(clientRepository, times(1)).existsById(ID);
-	verify(clientRepository, times(1)).deleteById(ID);
+	verify(groupRepository, times(1)).existsById(ID);
+	verify(groupRepository, times(1)).deleteById(ID);
   }
 
   @Test
-  void deleteClientWhenClientNotExistsShouldReturnFalse() {
-	when(clientRepository.existsById(NON_EXISTENT_ID)).thenReturn(false);
+  void deleteGroupWhenGroupNotExistsShouldReturnFalse() {
+	when(groupRepository.existsById(NON_EXISTENT_ID)).thenReturn(false);
 
-	boolean result = clientService.deleteClient(NON_EXISTENT_ID);
+	boolean result = groupService.deleteGroup(NON_EXISTENT_ID);
 
 	assertThat(result).isFalse();
-	verify(clientRepository, times(1)).existsById(NON_EXISTENT_ID);
-	verify(clientRepository, never()).deleteById(anyLong());
+	verify(groupRepository, times(1)).existsById(NON_EXISTENT_ID);
+	verify(groupRepository, never()).deleteById(anyLong());
   }
 
   @Test
-  void createClientsBulkShouldReturnListOfCreatedClients() {
-	List<ClientCreateDto> createDtos = Arrays.asList(clientCreateDto, clientCreateDto);
-	List<Client> clients = Arrays.asList(client, client);
+  void createGroupsBulkShouldReturnListOfCreatedGroups() {
+	List<GroupCreateDTO> createDtos = Arrays.asList(groupCreateDto, groupCreateDto);
+	List<Group> groups = Arrays.asList(group, group);
 
-	when(clientRepository.saveAll(anyList())).thenReturn(clients);
-	when(clientMapper.toDto(any(Client.class))).thenReturn(clientDto);
+	when(groupRepository.saveAll(anyList())).thenReturn(groups);
+	when(groupMapper.toDto(any(Group.class))).thenReturn(groupDto);
 
-	List<ClientDto> result = clientService.createClientsBulk(createDtos);
+	List<GroupDTO> result = groupService.createGroupsBulk(createDtos);
 
 	assertThat(result).hasSize(2);
-	verify(clientRepository, times(1)).saveAll(anyList());
+	verify(groupRepository, times(1)).saveAll(anyList());
   }
 
   @Test
   void createClientsBulkWithEmptyListShouldReturnEmptyList() {
-	List<ClientCreateDto> createDtos = List.of();
+	List<GroupCreateDTO> createDtos = List.of();
 
-	when(clientRepository.saveAll(anyList())).thenReturn(List.of());
+	when(groupRepository.saveAll(anyList())).thenReturn(List.of());
 
-	List<ClientDto> result = clientService.createClientsBulk(createDtos);
+	List<GroupDTO> result = groupService.createGroupsBulk(createDtos);
 
 	assertThat(result).isEmpty();
-	verify(clientRepository, times(1)).saveAll(anyList());
+	verify(groupRepository, times(1)).saveAll(anyList());
   }
 
   @Test
-  void createClientsBulkWithTransactionWhenLessOrEqual3ShouldSucceed() {
-	List<ClientCreateDto> createDtos = Arrays.asList(
-		clientCreateDto, clientCreateDto, clientCreateDto
+  void createGroupsBulkWithTransactionWhenLessOrEqual5ShouldSucceed() {
+	List<GroupCreateDTO> createDtos = Arrays.asList(
+		groupCreateDto, groupCreateDto, groupCreateDto, groupCreateDto, groupCreateDto
 	);
-	List<Client> clients = Arrays.asList(client, client, client);
+	List<Group> groups = Arrays.asList(group, group, group, group, group);
 
-	when(clientRepository.saveAll(anyList())).thenReturn(clients);
-	when(clientMapper.toDto(any(Client.class))).thenReturn(clientDto);
+	when(groupRepository.saveAll(anyList())).thenReturn(groups);
+	when(groupMapper.toDto(any(Group.class))).thenReturn(groupDto);
 
-	List<ClientDto> result = clientService.createClientsBulkWithTransaction(createDtos);
+	List<GroupDTO> result = groupService.createGroupsBulkWithTransaction(createDtos);
 
-	assertThat(result).hasSize(3);
-	verify(clientRepository, times(1)).saveAll(anyList());
+	assertThat(result).hasSize(5);
+	verify(groupRepository, times(1)).saveAll(anyList());
   }
 
   @Test
-  void createClientsBulkWithTransactionWhenMoreThan3ShouldThrowException() {
-	List<ClientCreateDto> createDtos = Arrays.asList(
-		clientCreateDto, clientCreateDto, clientCreateDto, clientCreateDto
+  void createGroupsBulkWithTransactionWhenMoreThan5ShouldThrowException() {
+	List<GroupCreateDTO> createDtos = Arrays.asList(
+		groupCreateDto, groupCreateDto, groupCreateDto, groupCreateDto
 	);
-	List<Client> clients = Arrays.asList(client, client, client, client);
+	List<Group> groups = Arrays.asList(group, group, group, group, group);
 
-	when(clientRepository.saveAll(anyList())).thenReturn(clients);
+	when(groupRepository.saveAll(anyList())).thenReturn(groups);
 
-	assertThatThrownBy(() -> clientService.createClientsBulkWithTransaction(createDtos))
+	assertThatThrownBy(() -> groupService.createGroupsBulkWithTransaction(createDtos))
 		.isInstanceOf(NoSuchElementException.class)
 		.hasMessageContaining("Превышен лимит")
 		.hasMessageContaining("Транзакция будет откачена");
 
-	verify(clientRepository, times(1)).saveAll(anyList());
+	verify(groupRepository, times(1)).saveAll(anyList());
   }
 
   @Test
-  void createClientsBulkWithoutTransactionWhenLessOrEqual3ShouldSucceed() {
-	List<ClientCreateDto> createDtos = Arrays.asList(
-		clientCreateDto, clientCreateDto, clientCreateDto
+  void createGroupsBulkWithoutTransactionWhenLessOrEqual5ShouldSucceed() {
+	List<GroupCreateDTO> createDtos = Arrays.asList(
+		groupCreateDto, groupCreateDto, groupCreateDto, groupCreateDto, groupCreateDto
 	);
-	List<Client> clients = Arrays.asList(client, client, client);
+	List<Group> groups = Arrays.asList(group, group, group, group, group);
 
-	when(clientRepository.saveAll(anyList())).thenReturn(clients);
-	when(clientMapper.toDto(any(Client.class))).thenReturn(clientDto);
+	when(groupRepository.saveAll(anyList())).thenReturn(groups);
+	when(groupMapper.toDto(any(Group.class))).thenReturn(groupDto);
 
-	List<ClientDto> result = clientService.createClientsBulkWithoutTransaction(createDtos);
+	List<GroupDTO> result = groupService.createGroupsBulkWithoutTransaction(createDtos);
 
-	assertThat(result).hasSize(3);
-	verify(clientRepository, times(1)).saveAll(anyList());
+	assertThat(result).hasSize(5);
+	verify(groupRepository, times(1)).saveAll(anyList());
   }
 
   @Test
-  void createClientsBulkWithoutTransactionWhenMoreThan3ShouldThrowExceptionButDataSaved() {
-	List<ClientCreateDto> createDtos = Arrays.asList(
-		clientCreateDto, clientCreateDto, clientCreateDto, clientCreateDto
+  void createGroupsBulkWithoutTransactionWhenMoreThan5ShouldThrowExceptionButDataSaved() {
+	List<GroupCreateDTO> createDtos = Arrays.asList(
+		groupCreateDto, groupCreateDto, groupCreateDto, groupCreateDto, groupCreateDto
 	);
-	List<Client> clients = Arrays.asList(client, client, client, client);
+	List<Group> groups = Arrays.asList(group, group, group, group, group, group);
 
-	when(clientRepository.saveAll(anyList())).thenReturn(clients);
+	when(groupRepository.saveAll(anyList())).thenReturn(groups);
 
-	assertThatThrownBy(() -> clientService.createClientsBulkWithoutTransaction(createDtos))
+	assertThatThrownBy(() -> groupService.createGroupsBulkWithoutTransaction(createDtos))
 		.isInstanceOf(NoSuchElementException.class)
 		.hasMessageContaining("Превышен лимит")
 		.hasMessageContaining("Данные уже сохранены");
 
-	verify(clientRepository, times(1)).saveAll(anyList());
+	verify(groupRepository, times(1)).saveAll(anyList());
   }
 
-  @Test
-  void getClientByEmailWhenExistsShouldReturnClient() {
-	List<Client> clients = List.of(client);
-	when(clientRepository.findAll()).thenReturn(clients);
-	when(clientMapper.toDto(client)).thenReturn(clientDto);
 
-	ClientDto result = clientService.getClientByEmail(EMAIL);
-
-	assertThat(result).isNotNull();
-	assertThat(result.getEmail()).isEqualTo(EMAIL);
-	verify(clientRepository, times(1)).findAll();
-  }
-
-  @Test
-  void getClientByEmailWhenNotExistsShouldReturnNull() {
-	List<Client> clients = List.of(client);
-	when(clientRepository.findAll()).thenReturn(clients);
-
-	ClientDto result = clientService.getClientByEmail("notexists@mail.com");
-
-	assertThat(result).isNull();
-	verify(clientRepository, times(1)).findAll();
-  }
-
-  @Test
-  void getClientByEmailWhenEmailIsNullShouldReturnNull() {
-	Client clientWithNullEmail = Client.builder()
-		.id(ID)
-		.firstName(FIRST_NAME)
-		.lastName(LAST_NAME)
-		.phone(PHONE)
-		.email(null)
-		.build();
-
-	when(clientRepository.findAll()).thenReturn(List.of(clientWithNullEmail));
-
-	ClientDto result = clientService.getClientByEmail(EMAIL);
-
-	assertThat(result).isNull();
-	verify(clientRepository, times(1)).findAll();
-  }
-
-  @Test
-  void getClientByEmailWhenMultipleClientsShouldReturnFirstMatch() {
-	Client client1 = Client.builder()
-		.id(1L)
-		.firstName(FIRST_NAME)
-		.lastName(LAST_NAME)
-		.phone(PHONE)
-		.email(EMAIL)
-		.build();
-
-	Client client2 = Client.builder()
-		.id(2L)
-		.firstName("Петр")
-		.lastName("Сидоров")
-		.phone(PHONE)
-		.email(EMAIL)
-		.build();
-
-	ClientDto clientDto1 = ClientDto.builder()
-		.id(1L)
-		.firstName(FIRST_NAME)
-		.lastName(LAST_NAME)
-		.phone(PHONE)
-		.email(EMAIL)
-		.build();
-
-	List<Client> clients = Arrays.asList(client1, client2);
-	when(clientRepository.findAll()).thenReturn(clients);
-	when(clientMapper.toDto(any(Client.class))).thenReturn(clientDto1);
-
-	ClientDto result = clientService.getClientByEmail(EMAIL);
-
-	assertThat(result).isNotNull();
-	assertThat(result.getId()).isEqualTo(1L);
-	verify(clientRepository, times(1)).findAll();
-  }
-
-  @Test
-  void getClientByEmailWithNullParameterShouldReturnNull() {
-	ClientDto result = clientService.getClientByEmail(null);
-	assertThat(result).isNull();
-	verify(clientRepository, never()).findAll();
-  }
-
-  @Test
-  void getClientByEmailWhenEmailIsEmptyStringShouldReturnNull() {
-	List<Client> clients = List.of(client);
-	when(clientRepository.findAll()).thenReturn(clients);
-
-	ClientDto result = clientService.getClientByEmail("");
-
-	assertThat(result).isNull();
-	verify(clientRepository, times(1)).findAll();
-  }
-
-  @Test
-  void getClientsByPhonePatternShouldReturnFilteredList() {
-	List<Client> clients = List.of(client);
-	when(clientRepository.findAll()).thenReturn(clients);
-	when(clientMapper.toDto(client)).thenReturn(clientDto);
-
-	List<ClientDto> result = clientService.getClientsByPhonePattern("123");
-
-	assertThat(result).hasSize(1);
-	assertThat(result.get(0).getPhone()).contains("123");
-	verify(clientRepository, times(1)).findAll();
-  }
-
-  @Test
-  void getClientsByPhonePatternWhenNoMatchShouldReturnEmptyList() {
-	List<Client> clients = List.of(client);
-	when(clientRepository.findAll()).thenReturn(clients);
-
-	List<ClientDto> result = clientService.getClientsByPhonePattern("999");
-
-	assertThat(result).isEmpty();
-	verify(clientRepository, times(1)).findAll();
-  }
-
-  @Test
-  void getClientsByPhonePatternWhenPhoneIsNullShouldSkip() {
-	Client clientWithNullPhone = Client.builder()
-		.id(ID)
-		.firstName(FIRST_NAME)
-		.lastName(LAST_NAME)
-		.phone(null)
-		.email(EMAIL)
-		.build();
-
-	when(clientRepository.findAll()).thenReturn(List.of(clientWithNullPhone));
-
-	List<ClientDto> result = clientService.getClientsByPhonePattern("123");
-
-	assertThat(result).isEmpty();
-	verify(clientRepository, times(1)).findAll();
-  }
-
-  @Test
-  void getClientsByPhonePatternShouldReturnMultipleMatches() {
-	Client client2 = Client.builder()
-		.id(2L)
-		.firstName("Петр")
-		.lastName("Сидоров")
-		.phone("+375441234567")
-		.email("petr@mail.com")
-		.build();
-
-	ClientDto clientDto2 = ClientDto.builder()
-		.id(2L)
-		.firstName("Петр")
-		.lastName("Сидоров")
-		.phone("+375441234567")
-		.email("petr@mail.com")
-		.build();
-
-	List<Client> clients = Arrays.asList(client, client2);
-	when(clientRepository.findAll()).thenReturn(clients);
-	when(clientMapper.toDto(client)).thenReturn(clientDto);
-	when(clientMapper.toDto(client2)).thenReturn(clientDto2);
-
-	List<ClientDto> result = clientService.getClientsByPhonePattern("123");
-
-	assertThat(result).hasSize(2);
-	verify(clientRepository, times(1)).findAll();
-  }
-
-  @Test
-  void getClientsByPhonePatternWithNullParameterShouldReturnEmptyList() {
-	List<ClientDto> result = clientService.getClientsByPhonePattern(null);
-	assertThat(result).isEmpty();
-	verify(clientRepository, never()).findAll();
-  }
-
-  @Test
-  void getClientsByPhonePatternWithEmptyPatternShouldReturnAllWithPhone() {
-	List<Client> clients = List.of(client);
-	when(clientRepository.findAll()).thenReturn(clients);
-	when(clientMapper.toDto(client)).thenReturn(clientDto);
-
-	List<ClientDto> result = clientService.getClientsByPhonePattern("");
-
-	assertThat(result).hasSize(1);
-	verify(clientRepository, times(1)).findAll();
-  }
 
   @Test
   void updateClientWithAllFieldsNullShouldNotUpdateAnything() {
-	ClientUpdateDto emptyUpdate = new ClientUpdateDto();
+	GroupUpdateDTO emptyUpdate = new GroupUpdateDTO();
 
-	when(clientRepository.findById(ID)).thenReturn(Optional.of(client));
-	when(clientRepository.save(any(Client.class))).thenReturn(client);
-	when(clientMapper.toDto(client)).thenReturn(clientDto);
+	when(groupRepository.findById(ID)).thenReturn(Optional.of(group));
+	when(groupRepository.save(any(Group.class))).thenReturn(group);
+	when(groupMapper.toDto(group)).thenReturn(groupDto);
 
-	ClientDto result = clientService.updateClient(ID, emptyUpdate);
+	GroupDTO result = groupService.updateGroup(ID, emptyUpdate);
 
 	assertThat(result).isNotNull();
-	assertThat(result.getFirstName()).isEqualTo(FIRST_NAME);
-	assertThat(result.getLastName()).isEqualTo(LAST_NAME);
-	verify(clientRepository, times(1)).save(any(Client.class));
+	assertThat(result.getId()).isEqualTo(ID);
+	assertThat(result.getName()).isEqualTo(GROUP_NAME);
+	verify(groupRepository, times(1)).save(any(Group.class));
   }
 
   @Test
@@ -572,23 +349,4 @@ class GroupServiceTest {
 	verify(clientRepository, times(1)).save(any(Client.class));
   }
 
-  @Test
-  void convertToEntityShouldMapAllFields() {
-	ClientCreateDto dto = new ClientCreateDto();
-	dto.setFirstName(FIRST_NAME);
-	dto.setLastName(LAST_NAME);
-	dto.setPhone(PHONE);
-	dto.setEmail(EMAIL);
-
-	when(clientRepository.save(any(Client.class))).thenReturn(client);
-	when(clientMapper.toDto(any(Client.class))).thenReturn(clientDto);
-
-	ClientDto result = clientService.createClient(dto);
-
-	assertThat(result).isNotNull();
-	assertThat(result.getFirstName()).isEqualTo(FIRST_NAME);
-	assertThat(result.getLastName()).isEqualTo(LAST_NAME);
-	assertThat(result.getPhone()).isEqualTo(PHONE);
-	assertThat(result.getEmail()).isEqualTo(EMAIL);
-  }
 }
