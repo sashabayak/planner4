@@ -38,8 +38,8 @@ public class GroupService {
   }
   @Transactional
   public GroupDTO createGroup(GroupCreateDTO createDTO) {
-    Group group = mapper.toEntity(createDTO);
-	return mapper.toDto(repository.save(group));
+    Group group = GroupMapper.toEntity(createDTO);
+    return mapper.toDto(repository.save(group));
   }
   @Transactional
   public GroupDTO updateGroup(Long id, GroupUpdateDTO updateDto) {
