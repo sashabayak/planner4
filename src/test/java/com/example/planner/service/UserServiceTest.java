@@ -358,7 +358,6 @@ class UserServiceTest {
 
   @Test
   void deleteUser_WhenUserHasNoGroupAndNoRole_ShouldNotInvalidateCache() {
-	// Arrange - пользователь без группы и без роли
 	User userWithoutGroupAndRole = User.builder()
 		.id(ID)
 		.name("Test User")
@@ -368,12 +367,9 @@ class UserServiceTest {
 
 	when(repository.findById(ID)).thenReturn(Optional.of(userWithoutGroupAndRole));
 
-	// Act
 	boolean result = userService.deleteUser(ID);
 
-	// Assert
 	assertThat(result).isTrue();
-	// Проверяем, что методы кэша НЕ вызывались (так как groupName и roleName = null)
 	verify(userCache, never()).invalidateByGroupName(any());
 	verify(userCache, never()).invalidateByRoleName(any());
 	verify(repository).delete(userWithoutGroupAndRole);
@@ -381,7 +377,6 @@ class UserServiceTest {
 
   @Test
   void deleteUser_WhenUserHasGroupButNoRole_ShouldInvalidateOnlyGroup() {
-	// Arrange - пользователь с группой, но без роли
 	User userWithGroupOnly = User.builder()
 		.id(ID)
 		.name("Test User")
@@ -391,21 +386,16 @@ class UserServiceTest {
 
 	when(repository.findById(ID)).thenReturn(Optional.of(userWithGroupOnly));
 
-	// Act
 	boolean result = userService.deleteUser(ID);
 
-	// Assert
 	assertThat(result).isTrue();
-	// Должен быть вызван только invalidateByGroupName
 	verify(userCache).invalidateByGroupName("AdminGroup");
-	// invalidateByRoleName НЕ должен вызываться (roleName = null)
 	verify(userCache, never()).invalidateByRoleName(any());
 	verify(repository).delete(userWithGroupOnly);
   }
 
   @Test
   void deleteUser_WhenUserHasRoleButNoGroup_ShouldInvalidateOnlyRole() {
-	// Arrange - пользователь с ролью, но без группы
 	User userWithRoleOnly = User.builder()
 		.id(ID)
 		.name("Test User")
@@ -415,27 +405,20 @@ class UserServiceTest {
 
 	when(repository.findById(ID)).thenReturn(Optional.of(userWithRoleOnly));
 
-	// Act
 	boolean result = userService.deleteUser(ID);
 
-	// Assert
 	assertThat(result).isTrue();
-	// invalidateByGroupName НЕ должен вызываться (groupName = null)
 	verify(userCache, never()).invalidateByGroupName(any());
-	// Должен быть вызван только invalidateByRoleName
 	verify(userCache).invalidateByRoleName("ADMIN");
 	verify(repository).delete(userWithRoleOnly);
   }
 
   @Test
   void deleteUser_WhenUserHasBothGroupAndRole_ShouldInvalidateBoth() {
-	// Arrange - пользователь и с группой, и с ролью (этот тест у вас уже есть)
 	when(repository.findById(ID)).thenReturn(Optional.of(user));
 
-	// Act
 	boolean result = userService.deleteUser(ID);
 
-	// Assert
 	assertThat(result).isTrue();
 	verify(userCache).invalidateByGroupName("AdminGroup");
 	verify(userCache).invalidateByRoleName("ADMIN");
@@ -444,13 +427,10 @@ class UserServiceTest {
 
   @Test
   void deleteUser_WhenUserNotFound_ShouldReturnFalse() {
-	// Arrange
 	when(repository.findById(ID)).thenReturn(Optional.empty());
 
-	// Act
 	boolean result = userService.deleteUser(ID);
 
-	// Assert
 	assertThat(result).isFalse();
 	verify(userCache, never()).invalidateByGroupName(any());
 	verify(userCache, never()).invalidateByRoleName(any());
@@ -459,7 +439,6 @@ class UserServiceTest {
 
   @Test
   void demonstrateNPlus1_WithUserWithoutGroupAndRole_ShouldHandleNulls() {
-	// Arrange - пользователь без группы и без роли
 	User userWithoutGroupAndRole = User.builder()
 		.id(2L)
 		.name("User Without Group/Role")
@@ -469,16 +448,13 @@ class UserServiceTest {
 
 	when(repository.findAllWithoutFetch()).thenReturn(List.of(userWithoutGroupAndRole));
 
-	// Act
 	userService.demonstrateNPlus1Problem();
 
-	// Assert
 	verify(repository).findAllWithoutFetch();
   }
 
   @Test
   void demonstrateNPlus1_WithUserWithoutGroup_ShouldHandleNullGroup() {
-	// Arrange - пользователь только с ролью, без группы
 	User userWithoutGroup = User.builder()
 		.id(2L)
 		.name("User Without Group")
@@ -488,16 +464,13 @@ class UserServiceTest {
 
 	when(repository.findAllWithoutFetch()).thenReturn(List.of(userWithoutGroup));
 
-	// Act
 	userService.demonstrateNPlus1Problem();
 
-	// Assert
 	verify(repository).findAllWithoutFetch();
   }
 
   @Test
   void demonstrateNPlus1_WithUserWithoutRole_ShouldHandleNullRole() {
-	// Arrange - пользователь только с группой, без роли
 	User userWithoutRole = User.builder()
 		.id(2L)
 		.name("User Without Role")
@@ -507,16 +480,13 @@ class UserServiceTest {
 
 	when(repository.findAllWithoutFetch()).thenReturn(List.of(userWithoutRole));
 
-	// Act
 	userService.demonstrateNPlus1Problem();
 
-	// Assert
 	verify(repository).findAllWithoutFetch();
   }
 
   @Test
   void demonstrateEntityGraph_WithUserWithoutGroupAndRole_ShouldHandleNulls() {
-	// Arrange - пользователь без группы и без роли
 	User userWithoutGroupAndRole = User.builder()
 		.id(2L)
 		.name("User Without Group/Role")
@@ -526,16 +496,13 @@ class UserServiceTest {
 
 	when(repository.findAllWithEntityGraph()).thenReturn(List.of(userWithoutGroupAndRole));
 
-	// Act
 	userService.demonstrateEntityGraphSolution();
 
-	// Assert
 	verify(repository).findAllWithEntityGraph();
   }
 
   @Test
   void demonstrateEntityGraph_WithUserWithoutGroup_ShouldHandleNullGroup() {
-	// Arrange - пользователь только с ролью, без группы
 	User userWithoutGroup = User.builder()
 		.id(2L)
 		.name("User Without Group")
@@ -545,16 +512,13 @@ class UserServiceTest {
 
 	when(repository.findAllWithEntityGraph()).thenReturn(List.of(userWithoutGroup));
 
-	// Act
 	userService.demonstrateEntityGraphSolution();
 
-	// Assert
 	verify(repository).findAllWithEntityGraph();
   }
 
   @Test
   void demonstrateEntityGraph_WithUserWithoutRole_ShouldHandleNullRole() {
-	// Arrange - пользователь только с группой, без роли
 	User userWithoutRole = User.builder()
 		.id(2L)
 		.name("User Without Role")
@@ -564,10 +528,8 @@ class UserServiceTest {
 
 	when(repository.findAllWithEntityGraph()).thenReturn(List.of(userWithoutRole));
 
-	// Act
 	userService.demonstrateEntityGraphSolution();
 
-	// Assert
 	verify(repository).findAllWithEntityGraph();
   }
 
