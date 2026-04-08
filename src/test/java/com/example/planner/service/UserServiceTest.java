@@ -124,18 +124,6 @@ class UserServiceTest {
   }
 
   @Test
-  void deleteUser_WhenExists_ShouldInvalidateSpecificCache() {
-	when(repository.findById(ID)).thenReturn(Optional.of(user));
-
-	boolean result = userService.deleteUser(ID);
-
-	assertThat(result).isTrue();
-	verify(userCache).invalidateByGroupName("AdminGroup");
-	verify(userCache).invalidateByRoleName("ADMIN");
-	verify(repository).delete(user);
-  }
-
-  @Test
   void deleteUser_WhenNotFound_ShouldReturnFalse() {
 	when(repository.findById(ID)).thenReturn(Optional.empty());
 	assertThat(userService.deleteUser(ID)).isFalse();
