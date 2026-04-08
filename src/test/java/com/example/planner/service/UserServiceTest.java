@@ -214,7 +214,27 @@ class UserServiceTest {
 	userService.demonstrateEntityGraphSolution();
 	verify(repository).findAllWithEntityGraph();
   }
+  @Test
+  void createWithRelatedWithTransaction_ShouldUseTransactionalMessage() {
+	when(groupRepository.findById(1L)).thenReturn(Optional.of(group));
+	when(roleRepository.findById(1L)).thenReturn(Optional.of(role));
+	when(repository.save(any())).thenReturn(user);
 
+	userService.createWithRelatedWithTransaction(createDto);
+
+	verify(repository).save(any());
+  }
+
+  @Test
+  void createWithRelatedWithoutTransaction_ShouldUseNonTransactionalMessage() {
+	when(groupRepository.findById(1L)).thenReturn(Optional.of(group));
+	when(roleRepository.findById(1L)).thenReturn(Optional.of(role));
+	when(repository.save(any())).thenReturn(user);
+
+	userService.createWithRelatedWithoutTransaction(createDto);
+
+	verify(repository).save(any());
+  }
   @Test
   void processUserCreation_WithTransaction_ShouldWork() {
 	when(groupRepository.findById(1L)).thenReturn(Optional.of(group));
