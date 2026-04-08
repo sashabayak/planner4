@@ -457,4 +457,118 @@ class UserServiceTest {
 	verify(repository, never()).delete(any());
   }
 
+  @Test
+  void demonstrateNPlus1_WithUserWithoutGroupAndRole_ShouldHandleNulls() {
+	// Arrange - пользователь без группы и без роли
+	User userWithoutGroupAndRole = User.builder()
+		.id(2L)
+		.name("User Without Group/Role")
+		.group(null)
+		.role(null)
+		.build();
+
+	when(repository.findAllWithoutFetch()).thenReturn(List.of(userWithoutGroupAndRole));
+
+	// Act
+	userService.demonstrateNPlus1Problem();
+
+	// Assert
+	verify(repository).findAllWithoutFetch();
+  }
+
+  @Test
+  void demonstrateNPlus1_WithUserWithoutGroup_ShouldHandleNullGroup() {
+	// Arrange - пользователь только с ролью, без группы
+	User userWithoutGroup = User.builder()
+		.id(2L)
+		.name("User Without Group")
+		.group(null)
+		.role(role)
+		.build();
+
+	when(repository.findAllWithoutFetch()).thenReturn(List.of(userWithoutGroup));
+
+	// Act
+	userService.demonstrateNPlus1Problem();
+
+	// Assert
+	verify(repository).findAllWithoutFetch();
+  }
+
+  @Test
+  void demonstrateNPlus1_WithUserWithoutRole_ShouldHandleNullRole() {
+	// Arrange - пользователь только с группой, без роли
+	User userWithoutRole = User.builder()
+		.id(2L)
+		.name("User Without Role")
+		.group(group)
+		.role(null)
+		.build();
+
+	when(repository.findAllWithoutFetch()).thenReturn(List.of(userWithoutRole));
+
+	// Act
+	userService.demonstrateNPlus1Problem();
+
+	// Assert
+	verify(repository).findAllWithoutFetch();
+  }
+
+  @Test
+  void demonstrateEntityGraph_WithUserWithoutGroupAndRole_ShouldHandleNulls() {
+	// Arrange - пользователь без группы и без роли
+	User userWithoutGroupAndRole = User.builder()
+		.id(2L)
+		.name("User Without Group/Role")
+		.group(null)
+		.role(null)
+		.build();
+
+	when(repository.findAllWithEntityGraph()).thenReturn(List.of(userWithoutGroupAndRole));
+
+	// Act
+	userService.demonstrateEntityGraphSolution();
+
+	// Assert
+	verify(repository).findAllWithEntityGraph();
+  }
+
+  @Test
+  void demonstrateEntityGraph_WithUserWithoutGroup_ShouldHandleNullGroup() {
+	// Arrange - пользователь только с ролью, без группы
+	User userWithoutGroup = User.builder()
+		.id(2L)
+		.name("User Without Group")
+		.group(null)
+		.role(role)
+		.build();
+
+	when(repository.findAllWithEntityGraph()).thenReturn(List.of(userWithoutGroup));
+
+	// Act
+	userService.demonstrateEntityGraphSolution();
+
+	// Assert
+	verify(repository).findAllWithEntityGraph();
+  }
+
+  @Test
+  void demonstrateEntityGraph_WithUserWithoutRole_ShouldHandleNullRole() {
+	// Arrange - пользователь только с группой, без роли
+	User userWithoutRole = User.builder()
+		.id(2L)
+		.name("User Without Role")
+		.group(group)
+		.role(null)
+		.build();
+
+	when(repository.findAllWithEntityGraph()).thenReturn(List.of(userWithoutRole));
+
+	// Act
+	userService.demonstrateEntityGraphSolution();
+
+	// Assert
+	verify(repository).findAllWithEntityGraph();
+  }
+
 }
