@@ -35,6 +35,10 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<springdoc.version>2.7.0</springdoc.version>
 		<sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+
+		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+		<sonar.organization>sashabayak</sonar.organization>
+		<sonar.projectKey>sashabayak_planner4</sonar.projectKey>
 	</properties>
 	<dependencies>
 		<dependency>
