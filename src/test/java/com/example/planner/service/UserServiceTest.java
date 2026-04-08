@@ -255,4 +255,104 @@ class UserServiceTest {
 	assertThatThrownBy(() -> userService.createWithRelatedWithoutTransaction(createDto))
 		.isInstanceOf(IllegalStateException.class);
   }
+  @Test
+  void updateUser_OnlyName_ShouldUpdateOnlyName() {
+	UserUpdateDTO update = new UserUpdateDTO();
+	update.setName("Updated Name Only");
+
+	when(repository.findById(ID)).thenReturn(Optional.of(user));
+	when(repository.save(any())).thenReturn(user);
+	when(mapper.toDto(any())).thenReturn(userDto);
+
+	userService.updateUser(ID, update);
+
+	assertThat(user.getName()).isEqualTo("Updated Name Only");
+	assertThat(user.getGroup()).isEqualTo(group);  // остался прежним
+	assertThat(user.getRole()).isEqualTo(role);    // остался прежним
+	verify(userCache).invalidateAll();
+  }
+
+  @Test
+  void updateUser_OnlyGroupId_ShouldUpdateOnlyGroup() {
+	Group newGroup = Group.builder().id(2L).name("NewGroup").build();
+	UserUpdateDTO update = new UserUpdateDTO();
+	update.setGroupId(2L);
+
+	when(repository.findById(ID)).thenReturn(Optional.of(user));
+	when(groupRepository.findById(2L)).thenReturn(Optional.of(newGroup));
+	when(repository.save(any())).thenReturn(user);
+	when(mapper.toDto(any())).thenReturn(userDto);
+
+	userService.updateUser(ID, update);
+
+	assertThat(user.getGroup()).isEqualTo(newGroup);
+	assertThat(user.getName()).isEqualTo("Test User"); // не изменилось
+	verify(userCache).invalidateAll();
+  }
+
+  @Test
+  void updateUser_OnlyRoleId_ShouldUpdateOnlyRole() {
+	Role newRole = Role.builder().id(2L).name("USER").build();
+	UserUpdateDTO update = new UserUpdateDTO();
+	update.setRoleId(2L);
+
+	when(repository.findById(ID)).thenReturn(Optional.of(user));
+	when(roleRepository.findById(2L)).thenReturn(Optional.of(newRole));
+	when(repository.save(any())).thenReturn(user);
+	when(mapper.toDto(any())).thenReturn(userDto);
+
+	userService.updateUser(ID, update);
+
+	assertThat(user.getRole()).isEqualTo(newRole);
+	verify(userCache).invalidateAll();
+  }
+
+  @Test
+  void updateUser_OnlyBirthDate_ShouldUpdateOnlyBirthDate() {
+	LocalDate newBirthDate = LocalDate.now().minusYears(30);
+	UserUpdateDTO update = new UserUpdateDTO();
+	update.setBirthDate(newBirthDate);
+
+	when(repository.findById(ID)).thenReturn(Optional.of(user));
+	when(repository.save(any())).thenReturn(user);
+	when(mapper.toDto(any())).thenReturn(userDto);
+
+	userService.updateUser(ID, update);
+
+	assertThat(user.getBirthDate()).isEqualTo(newBirthDate);
+	verify(userCache).invalidateAll();
+  }
+
+  @Test
+  void updateUser_EmptyUpdate_ShouldNotChangeAnything() {
+	UserUpdateDTO update = new UserUpdateDTO(); // все поля null
+
+	when(repository.findById(ID)).thenReturn(Optional.of(user));
+	when(repository.save(any())).thenReturn(user);
+	when(mapper.toDto(any())).thenReturn(userDto);
+
+	userService.updateUser(ID, update);
+
+	assertThat(user.getName()).isEqualTo("Test User");
+	assertThat(user.getGroup()).isEqualTo(group);
+	assertThat(user.getRole()).isEqualTo(role);
+	verify(userCache).invalidateAll();
+  }
+
+  @Test
+  void updateUser_NullName_ShouldNotUpdateName() {
+	UserUpdateDTO update = new UserUpdateDTO();
+	update.setName(null); // явно null
+	update.setGroupId(1L);
+
+	when(repository.findById(ID)).thenReturn(Optional.of(user));
+	when(groupRepository.findById(1L)).thenReturn(Optional.of(group));
+	when(repository.save(any())).thenReturn(user);
+	when(mapper.toDto(any())).thenReturn(userDto);
+
+	userService.updateUser(ID, update);
+
+	assertThat(user.getName()).isEqualTo("Test User"); // имя не изменилось
+	verify(userCache).invalidateAll();
+  }
 }
