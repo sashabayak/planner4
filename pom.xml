@@ -40,9 +40,20 @@
 		<sonar.organization>sashabayak</sonar.organization>
 		<sonar.projectKey>sashabayak_planner4</sonar.projectKey>
 
-		<sonar.coverage.inclusions>
-			**/service/**/*
-		</sonar.coverage.inclusions>
+		<sonar.coverage.exclusions>
+			**/dto/**/*,
+			**/controller/**/*,
+			**/repository/**/*,
+			**/mapper/**/*,
+			**/config/**/*,
+			**/aspect/**/*,
+			**/cache/**/*,
+			**/entity/**/*,
+			**/exception/**/*,
+			**/handler/**/*,
+			**/PlannerApplication.java,
+			**/resources/**/*
+		</sonar.coverage.exclusions>
 
 	</properties>
 	<dependencies>
