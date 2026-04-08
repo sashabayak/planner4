@@ -136,7 +136,6 @@ class ItemServiceTest {
 
   @Test
   void updateItem_WhenExistsAndCompletedIsNull_ShouldNotChangeCompletedStatus() {
-	// Случай для проверки условия if (updateDto.getCompleted() != null)
 	itemUpdateDto.setCompleted(null);
 	item.setCompleted(false);
 
