@@ -267,8 +267,8 @@ class UserServiceTest {
 	userService.updateUser(ID, update);
 
 	assertThat(user.getName()).isEqualTo("Updated Name Only");
-	assertThat(user.getGroup()).isEqualTo(group);
-	assertThat(user.getRole()).isEqualTo(role);
+	assertThat(user.getGroup()).isEqualTo(group);  // остался прежним
+	assertThat(user.getRole()).isEqualTo(role);    // остался прежним
 	verify(userCache).invalidateAll();
   }
 
@@ -325,7 +325,7 @@ class UserServiceTest {
 
   @Test
   void updateUser_EmptyUpdate_ShouldNotChangeAnything() {
-	UserUpdateDTO update = new UserUpdateDTO();
+	UserUpdateDTO update = new UserUpdateDTO(); // все поля null
 
 	when(repository.findById(ID)).thenReturn(Optional.of(user));
 	when(repository.save(any())).thenReturn(user);
@@ -342,7 +342,7 @@ class UserServiceTest {
   @Test
   void updateUser_NullName_ShouldNotUpdateName() {
 	UserUpdateDTO update = new UserUpdateDTO();
-	update.setName(null);
+	update.setName(null); // явно null
 	update.setGroupId(1L);
 
 	when(repository.findById(ID)).thenReturn(Optional.of(user));
@@ -357,7 +357,8 @@ class UserServiceTest {
   }
 
   @Test
-  void deleteUser_WhenUserHasNoGroupAndNoRole_ShouldInvalidateOnlyByNullValues() {
+  void deleteUser_WhenUserHasNoGroupAndNoRole_ShouldNotInvalidateCache() {
+	// Arrange - пользователь без группы и без роли
 	User userWithoutGroupAndRole = User.builder()
 		.id(ID)
 		.name("Test User")
@@ -367,16 +368,20 @@ class UserServiceTest {
 
 	when(repository.findById(ID)).thenReturn(Optional.of(userWithoutGroupAndRole));
 
+	// Act
 	boolean result = userService.deleteUser(ID);
 
+	// Assert
 	assertThat(result).isTrue();
-	verify(userCache).invalidateByGroupName(null);
-	verify(userCache).invalidateByRoleName(null);
+	// Проверяем, что методы кэша НЕ вызывались (так как groupName и roleName = null)
+	verify(userCache, never()).invalidateByGroupName(any());
+	verify(userCache, never()).invalidateByRoleName(any());
 	verify(repository).delete(userWithoutGroupAndRole);
   }
 
   @Test
-  void deleteUser_WhenUserHasGroupButNoRole_ShouldHandleNullRole() {
+  void deleteUser_WhenUserHasGroupButNoRole_ShouldInvalidateOnlyGroup() {
+	// Arrange - пользователь с группой, но без роли
 	User userWithGroupOnly = User.builder()
 		.id(ID)
 		.name("Test User")
@@ -386,16 +391,21 @@ class UserServiceTest {
 
 	when(repository.findById(ID)).thenReturn(Optional.of(userWithGroupOnly));
 
+	// Act
 	boolean result = userService.deleteUser(ID);
 
+	// Assert
 	assertThat(result).isTrue();
+	// Должен быть вызван только invalidateByGroupName
 	verify(userCache).invalidateByGroupName("AdminGroup");
-	verify(userCache).invalidateByRoleName(null);
+	// invalidateByRoleName НЕ должен вызываться (roleName = null)
+	verify(userCache, never()).invalidateByRoleName(any());
 	verify(repository).delete(userWithGroupOnly);
   }
 
   @Test
-  void deleteUser_WhenUserHasRoleButNoGroup_ShouldHandleNullGroup() {
+  void deleteUser_WhenUserHasRoleButNoGroup_ShouldInvalidateOnlyRole() {
+	// Arrange - пользователь с ролью, но без группы
 	User userWithRoleOnly = User.builder()
 		.id(ID)
 		.name("Test User")
@@ -405,11 +415,46 @@ class UserServiceTest {
 
 	when(repository.findById(ID)).thenReturn(Optional.of(userWithRoleOnly));
 
+	// Act
 	boolean result = userService.deleteUser(ID);
 
+	// Assert
 	assertThat(result).isTrue();
-	verify(userCache).invalidateByGroupName(null);
+	// invalidateByGroupName НЕ должен вызываться (groupName = null)
+	verify(userCache, never()).invalidateByGroupName(any());
+	// Должен быть вызван только invalidateByRoleName
 	verify(userCache).invalidateByRoleName("ADMIN");
 	verify(repository).delete(userWithRoleOnly);
   }
+
+  @Test
+  void deleteUser_WhenUserHasBothGroupAndRole_ShouldInvalidateBoth() {
+	// Arrange - пользователь и с группой, и с ролью (этот тест у вас уже есть)
+	when(repository.findById(ID)).thenReturn(Optional.of(user));
+
+	// Act
+	boolean result = userService.deleteUser(ID);
+
+	// Assert
+	assertThat(result).isTrue();
+	verify(userCache).invalidateByGroupName("AdminGroup");
+	verify(userCache).invalidateByRoleName("ADMIN");
+	verify(repository).delete(user);
+  }
+
+  @Test
+  void deleteUser_WhenUserNotFound_ShouldReturnFalse() {
+	// Arrange
+	when(repository.findById(ID)).thenReturn(Optional.empty());
+
+	// Act
+	boolean result = userService.deleteUser(ID);
+
+	// Assert
+	assertThat(result).isFalse();
+	verify(userCache, never()).invalidateByGroupName(any());
+	verify(userCache, never()).invalidateByRoleName(any());
+	verify(repository, never()).delete(any());
+  }
+
 }
