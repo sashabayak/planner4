@@ -267,8 +267,8 @@ class UserServiceTest {
 	userService.updateUser(ID, update);
 
 	assertThat(user.getName()).isEqualTo("Updated Name Only");
-	assertThat(user.getGroup()).isEqualTo(group);  // остался прежним
-	assertThat(user.getRole()).isEqualTo(role);    // остался прежним
+	assertThat(user.getGroup()).isEqualTo(group);
+	assertThat(user.getRole()).isEqualTo(role);
 	verify(userCache).invalidateAll();
   }
 
@@ -325,7 +325,7 @@ class UserServiceTest {
 
   @Test
   void updateUser_EmptyUpdate_ShouldNotChangeAnything() {
-	UserUpdateDTO update = new UserUpdateDTO(); // все поля null
+	UserUpdateDTO update = new UserUpdateDTO();
 
 	when(repository.findById(ID)).thenReturn(Optional.of(user));
 	when(repository.save(any())).thenReturn(user);
@@ -342,7 +342,7 @@ class UserServiceTest {
   @Test
   void updateUser_NullName_ShouldNotUpdateName() {
 	UserUpdateDTO update = new UserUpdateDTO();
-	update.setName(null); // явно null
+	update.setName(null);
 	update.setGroupId(1L);
 
 	when(repository.findById(ID)).thenReturn(Optional.of(user));
@@ -354,5 +354,62 @@ class UserServiceTest {
 
 	assertThat(user.getName()).isEqualTo("Test User"); // имя не изменилось
 	verify(userCache).invalidateAll();
+  }
+
+  @Test
+  void deleteUser_WhenUserHasNoGroupAndNoRole_ShouldInvalidateOnlyByNullValues() {
+	User userWithoutGroupAndRole = User.builder()
+		.id(ID)
+		.name("Test User")
+		.group(null)
+		.role(null)
+		.build();
+
+	when(repository.findById(ID)).thenReturn(Optional.of(userWithoutGroupAndRole));
+
+	boolean result = userService.deleteUser(ID);
+
+	assertThat(result).isTrue();
+	verify(userCache).invalidateByGroupName(null);
+	verify(userCache).invalidateByRoleName(null);
+	verify(repository).delete(userWithoutGroupAndRole);
+  }
+
+  @Test
+  void deleteUser_WhenUserHasGroupButNoRole_ShouldHandleNullRole() {
+	User userWithGroupOnly = User.builder()
+		.id(ID)
+		.name("Test User")
+		.group(group)
+		.role(null)
+		.build();
+
+	when(repository.findById(ID)).thenReturn(Optional.of(userWithGroupOnly));
+
+	boolean result = userService.deleteUser(ID);
+
+	assertThat(result).isTrue();
+	verify(userCache).invalidateByGroupName("AdminGroup");
+	verify(userCache).invalidateByRoleName(null);
+	verify(repository).delete(userWithGroupOnly);
+  }
+
+  @Test
+  void deleteUser_WhenUserHasRoleButNoGroup_ShouldHandleNullGroup() {
+	User userWithRoleOnly = User.builder()
+		.id(ID)
+		.name("Test User")
+		.group(null)
+		.role(role)
+		.build();
+
+	when(repository.findById(ID)).thenReturn(Optional.of(userWithRoleOnly));
+
+	boolean result = userService.deleteUser(ID);
+
+	assertThat(result).isTrue();
+	verify(userCache).invalidateByGroupName(null);
+	verify(userCache).invalidateByRoleName("ADMIN");
+	verify(repository).delete(userWithRoleOnly);
   }
 }
