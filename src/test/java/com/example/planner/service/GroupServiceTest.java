@@ -151,7 +151,7 @@ class GroupServiceTest {
 	when(groupRepository.save(any(Group.class))).thenReturn(updatedGroup);
 	when(groupMapper.toDto(updatedGroup)).thenReturn(updatedDto);
 
-	GroupDTO result = groupService.updateGrouop(ID, groupUpdateDto);
+	GroupDTO result = groupService.updateGroup(ID, groupUpdateDto);
 
 	assertThat(result).isNotNull();
 	assertThat(result.getId()).isEqualTo(ID);
@@ -209,7 +209,7 @@ class GroupServiceTest {
   }
 
   @Test
-  void createClientsBulkWithEmptyListShouldReturnEmptyList() {
+  void createGroupsBulkWithEmptyListShouldReturnEmptyList() {
 	List<GroupCreateDTO> createDtos = List.of();
 
 	when(groupRepository.saveAll(anyList())).thenReturn(List.of());
@@ -239,9 +239,9 @@ class GroupServiceTest {
   @Test
   void createGroupsBulkWithTransactionWhenMoreThan5ShouldThrowException() {
 	List<GroupCreateDTO> createDtos = Arrays.asList(
-		groupCreateDto, groupCreateDto, groupCreateDto, groupCreateDto
+		groupCreateDto, groupCreateDto, groupCreateDto, groupCreateDto, groupCreateDto, groupCreateDto
 	);
-	List<Group> groups = Arrays.asList(group, group, group, group, group);
+	List<Group> groups = Arrays.asList(group, group, group,group, group, group);
 
 	when(groupRepository.saveAll(anyList())).thenReturn(groups);
 
@@ -272,7 +272,7 @@ class GroupServiceTest {
   @Test
   void createGroupsBulkWithoutTransactionWhenMoreThan5ShouldThrowExceptionButDataSaved() {
 	List<GroupCreateDTO> createDtos = Arrays.asList(
-		groupCreateDto, groupCreateDto, groupCreateDto, groupCreateDto, groupCreateDto
+		groupCreateDto, groupCreateDto, groupCreateDto, groupCreateDto, groupCreateDto, groupCreateDto
 	);
 	List<Group> groups = Arrays.asList(group, group, group, group, group, group);
 
@@ -289,7 +289,7 @@ class GroupServiceTest {
 
 
   @Test
-  void updateClientWithAllFieldsNullShouldNotUpdateAnything() {
+  void updateGroupWithAllFieldsNullShouldNotUpdateAnything() {
 	GroupUpdateDTO emptyUpdate = new GroupUpdateDTO();
 
 	when(groupRepository.findById(ID)).thenReturn(Optional.of(group));
@@ -305,48 +305,38 @@ class GroupServiceTest {
   }
 
   @Test
-  void deleteClientWhenRepositoryThrowsExceptionShouldStillReturnTrue() {
-	when(clientRepository.existsById(ID)).thenReturn(true);
-	doNothing().when(clientRepository).deleteById(ID);
+  void deleteGroupWhenRepositoryThrowsExceptionShouldStillReturnTrue() {
+	when(groupRepository.existsById(ID)).thenReturn(true);
+	doNothing().when(groupRepository).deleteById(ID);
 
-	boolean result = clientService.deleteClient(ID);
+	boolean result = groupService.deleteGroup(ID);
 
 	assertThat(result).isTrue();
-	verify(clientRepository, times(1)).deleteById(ID);
+	verify(groupRepository, times(1)).deleteById(ID);
   }
 
   @Test
-  void createClientWithNullFieldsShouldHandleGracefully() {
-	ClientCreateDto dtoWithNulls = new ClientCreateDto();
-	dtoWithNulls.setFirstName(null);
-	dtoWithNulls.setLastName(null);
-	dtoWithNulls.setPhone(null);
-	dtoWithNulls.setEmail(null);
+  void createGroup_WithNullFields_ShouldHandleGracefully() {
+	GroupCreateDTO dtoWithNulls = new GroupCreateDTO();
+	dtoWithNulls.setName(null);
 
-	Client clientWithNulls = Client.builder()
+	Group groupWithNulls = Group.builder()
 		.id(ID)
-		.firstName(null)
-		.lastName(null)
-		.phone(null)
-		.email(null)
+		.name(null)
 		.build();
 
-	ClientDto dtoWithNullsResult = ClientDto.builder()
-		.id(ID)
-		.firstName(null)
-		.lastName(null)
-		.phone(null)
-		.email(null)
-		.build();
+	GroupDTO dtoWithNullsResult = new GroupDTO();
+	dtoWithNullsResult.setId(ID);
+	dtoWithNullsResult.setName(null);
 
-	when(clientRepository.save(any(Client.class))).thenReturn(clientWithNulls);
-	when(clientMapper.toDto(any(Client.class))).thenReturn(dtoWithNullsResult);
+	when(groupRepository.save(any(Group.class))).thenReturn(groupWithNulls);
+	when(groupMapper.toDto(any(Group.class))).thenReturn(dtoWithNullsResult);
 
-	ClientDto result = clientService.createClient(dtoWithNulls);
+	GroupDTO result = groupService.createGroup(dtoWithNulls);
 
 	assertThat(result).isNotNull();
-	assertThat(result.getFirstName()).isNull();
-	verify(clientRepository, times(1)).save(any(Client.class));
+	assertThat(result.getName()).isNull();
+	verify(groupRepository, times(1)).save(any(Group.class));
   }
 
 }
