@@ -39,6 +39,17 @@
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 		<sonar.organization>sashabayak</sonar.organization>
 		<sonar.projectKey>sashabayak_planner4</sonar.projectKey>
+
+		<sonar.coverage.exclusions>
+			**/dto/**/*,
+			**/config/**/*,
+			**/controller/**/*,
+			**/repository/**/*,
+			**/mapper/**/*,
+			**/cache/**/*,
+			**/PlannerApplication.java,
+			**/exception/**/*
+		</sonar.coverage.exclusions>
 	</properties>
 	<dependencies>
 		<dependency>
