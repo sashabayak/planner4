@@ -41,8 +41,18 @@
 		<sonar.projectKey>sashabayak_planner4</sonar.projectKey>
 
 		<sonar.coverage.exclusions>
-			**/*,
-			!**/service/**/*
+			**/dto/**/*,
+			**/controller/**/*,
+			**/repository/**/*,
+			**/mapper/**/*,
+			**/config/**/*,
+			**/aspect/**/*,
+			**/cache/**/*,
+			**/entity/**/*,
+			**/exception/**/*,
+			**/handler/**/*,
+			**/PlannerApplication.java,
+			**/resources/**/*
 		</sonar.coverage.exclusions>
 
 	</properties>
@@ -203,7 +213,7 @@
 				</configuration>
 			</plugin>
 
-			
+
 		</plugins>
 	</build>
 
