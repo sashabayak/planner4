@@ -7,13 +7,16 @@ import com.example.planner.dto.user.UserDTO;
 import com.example.planner.dto.user.UserFilterDTO;
 import com.example.planner.dto.user.UserUpdateDTO;
 import com.example.planner.entity.Group;
+import com.example.planner.entity.Item;
 import com.example.planner.entity.Role;
 import com.example.planner.entity.User;
 import com.example.planner.mapper.UserMapper;
 import com.example.planner.repository.GroupRepository;
+import com.example.planner.repository.ItemRepository;
 import com.example.planner.repository.RoleRepository;
 import com.example.planner.repository.UserRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -45,6 +48,7 @@ public class UserService {
   private final GroupRepository groupRepository;
   private final RoleRepository roleRepository;
   private final UserCache userCache;
+  private final ItemRepository itemRepository;
 
 
   public List<UserDTO> getAllUsers() {
@@ -305,5 +309,51 @@ public class UserService {
 		.group(group)
 		.role(role)
 		.build();
+  }
+
+  public User getUserEntityById(Long id) {
+	return repository.findById(id)
+		.orElseThrow(() -> new NoSuchElementException("Пользователь с ID " + id + " не найден"));
+  }
+
+  @Transactional
+  public void addItemToUser(Long userId, Long itemId) {
+	LOG.info("=== addItemToUser ВЫЗВАН ===");      // LOG, а не log
+	LOG.info("Добавление задачи {} пользователю {}", itemId, userId);
+
+	User user = repository.findById(userId)
+		.orElseThrow(() -> new NoSuchElementException("Пользователь не найден"));
+	Item item = itemRepository.findById(itemId)
+		.orElseThrow(() -> new NoSuchElementException("Задача не найдена"));
+
+	LOG.info("Пользователь найден: {}", user.getName());
+	LOG.info("Задача найдена: {}", item.getName());
+
+	if (user.getItems() == null) {
+	  user.setItems(new ArrayList<>());
+	  LOG.info("Коллекция items была null, инициализирована");
+	}
+
+	boolean alreadyHas = user.getItems().stream().anyMatch(i -> i.getId().equals(itemId));
+	if (alreadyHas) {
+	  LOG.info("Задача уже есть у пользователя, пропускаем");
+	} else {
+	  user.getItems().add(item);
+	  LOG.info("Задача добавлена в коллекцию. Теперь у пользователя {} задач", user.getItems().size());
+	}
+
+	User savedUser = repository.save(user);
+	LOG.info("Пользователь сохранён. Коллекция items после сохранения: {}", savedUser.getItems().size());
+
+	repository.flush();
+	LOG.info("Flush выполнен");
+
+  }
+
+  @Transactional
+  public void removeItemFromUser(Long userId, Long itemId) {
+	User user = getUserEntityById(userId);
+	user.getItems().removeIf(item -> item.getId().equals(itemId));
+	repository.save(user);
   }
 }

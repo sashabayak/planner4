@@ -1,7 +1,9 @@
 package com.example.planner.dto.user;
 
 import java.time.LocalDate;
+import java.util.List;
 
+import com.example.planner.dto.item.ItemDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,4 +21,5 @@ public class UserDTO {
   private String roleName;
   private long groupId;
   private String groupName;
+  private List<ItemDTO> items;
 }

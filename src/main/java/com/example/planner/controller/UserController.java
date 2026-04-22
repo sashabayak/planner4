@@ -1,10 +1,13 @@
 package com.example.planner.controller;
 
 import com.example.planner.dto.ErrorResponse;
+import com.example.planner.dto.item.ItemDTO;
 import com.example.planner.dto.user.UserCreateDTO;
 import com.example.planner.dto.user.UserDTO;
 import com.example.planner.dto.user.UserFilterDTO;
 import com.example.planner.dto.user.UserUpdateDTO;
+import com.example.planner.entity.User;
+import com.example.planner.mapper.ItemMapper;
 import com.example.planner.service.UserService;
 
 import java.util.List;
@@ -39,7 +42,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 public class UserController {
   private final UserService userService;
-
+  private final ItemMapper itemMapper;
 
   @GetMapping("/search-jpql")
   @Operation(summary = "Поиск пользователей через JPQL")
@@ -132,7 +135,8 @@ public class UserController {
   })
   public ResponseEntity<UserDTO> getUserById(
 	  @Parameter(description = "ID пользователя", required = true) @PathVariable @Min(1) Long id) {
-    	return ResponseEntity.ok(userService.getUserById(id));
+	User user = userService.getUserEntityById(id);
+	return ResponseEntity.ok(userService.getUserById(id));
   }
   @PostMapping
   @Operation(summary = "Добавить пользователя")
@@ -200,5 +204,25 @@ public class UserController {
   @Operation(summary = "Получить всех пользователей")
   public ResponseEntity<List<UserDTO>> getAllUsers() {
 	return ResponseEntity.ok(userService.getAllUsers());
+  }
+
+  @GetMapping("/{userId}/items")
+  public ResponseEntity<List<ItemDTO>> getUserItems(@PathVariable Long userId) {
+	User user = userService.getUserEntityById(userId);
+	return ResponseEntity.ok(user.getItems().stream()
+		.map(itemMapper::toDto)
+		.toList());
+  }
+
+  @PostMapping("/{userId}/items/{itemId}")
+  public ResponseEntity<Void> addItemToUser(@PathVariable Long userId, @PathVariable Long itemId) {
+	userService.addItemToUser(userId, itemId);
+	return ResponseEntity.ok().build();
+  }
+
+  @DeleteMapping("/{userId}/items/{itemId}")
+  public ResponseEntity<Void> removeItemFromUser(@PathVariable Long userId, @PathVariable Long itemId) {
+	userService.removeItemFromUser(userId, itemId);
+	return ResponseEntity.ok().build();
   }
 }

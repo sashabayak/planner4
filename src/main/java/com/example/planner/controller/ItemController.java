@@ -4,6 +4,9 @@ import com.example.planner.dto.ErrorResponse;
 import com.example.planner.dto.item.ItemCreateDTO;
 import com.example.planner.dto.item.ItemDTO;
 import com.example.planner.dto.item.ItemUpdateDTO;
+import com.example.planner.dto.tag.TagDTO;
+import com.example.planner.entity.Item;
+import com.example.planner.mapper.TagMapper;
 import com.example.planner.service.ItemService;
 
 import java.util.List;
@@ -78,5 +81,25 @@ public class ItemController {
 	return service.deleteItem(id)
 		? ResponseEntity.noContent().build()
 		: ResponseEntity.notFound().build();
+  }
+
+  @GetMapping("/{itemId}/tags")
+  public ResponseEntity<List<TagDTO>> getItemTags(@PathVariable Long itemId) {
+	Item item = service.getItemEntityById(itemId);
+	return ResponseEntity.ok(item.getTags().stream()
+		.map(TagMapper::toDto)
+		.toList());
+  }
+
+  @PostMapping("/{itemId}/tags/{tagId}")
+  public ResponseEntity<Void> addTagToItem(@PathVariable Long itemId, @PathVariable Integer tagId) {
+	service.addTagToItem(itemId, tagId);
+	return ResponseEntity.ok().build();
+  }
+
+  @DeleteMapping("/{itemId}/tags/{tagId}")
+  public ResponseEntity<Void> removeTagFromItem(@PathVariable Long itemId, @PathVariable Integer tagId) {
+	service.removeTagFromItem(itemId, tagId);
+	return ResponseEntity.ok().build();
   }
 }
