@@ -98,34 +98,46 @@ const RoleList: React.FC = () => {
     if (isLoading) return <LoadingSpinner />;
 
     return (
-        <div className="min-h-screen pt-20 px-4">
+        <div className="min-h-screen pt-6 px-4">
             <div className="container mx-auto">
                 <div className="flex justify-between items-center mb-8 flex-wrap gap-4">
                     <div>
-                        <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent">
-                            Роли
-                        </h1>
-                        <p className="text-purple-300/70 mt-1">Управление ролями пользователей</p>
+                        <h1 className="text-4xl font-bold text-slate-600">Роли</h1>
+                        <p className="text-slate-600 mt-3 text-xl">Управление ролями пользователей</p>
                     </div>
                     <button
                         onClick={openCreateModal}
-                        className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 shadow-lg shadow-purple-500/25"
+                        className="bg-slate-600 hover:bg-slate-700 text-white px-6 py-3 rounded-xl font-semibold text-xl transition-all duration-300 flex items-center gap-2 shadow-md"
                     >
-                        <Plus className="w-5 h-5" />
+                        <Plus className="w-6 h-6" />
                         Добавить роль
                     </button>
                 </div>
 
-                <div className="mb-6">
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-purple-400" />
-                        <input
-                            type="text"
-                            placeholder="Поиск по названию роли..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-3 bg-black/40 backdrop-blur-sm border border-purple-500/30 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-purple-500 transition-all"
-                        />
+                <div className="bg-sky-100 backdrop-blur-sm border border-slate-500 rounded-xl p-5 mb-16">
+                    <div className="flex items-center gap-2 mb-4">
+                        <h3 className="text-slate-600 text-xl font-semibold">Фильтры</h3>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-600" />
+                            <input
+                                type="text"
+                                placeholder="Поиск по названию роли..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full pl-9 pr-4 py-2 text-lg bg-white/5 border border-slate-300 rounded-lg text-slate-600 placeholder-slate-600 focus:outline-none focus:border-slate-500 transition-all"
+                            />
+                        </div>
+                        {searchTerm && (
+                            <button
+                                onClick={() => setSearchTerm('')}
+                                className="px-4 py-2 bg-red-500/20 text-red-300 rounded-lg hover:bg-red-500/30 transition flex items-center justify-center gap-2"
+                            >
+                                <X className="w-4 h-4" />
+                                Сбросить
+                            </button>
+                        )}
                     </div>
                 </div>
 
@@ -138,30 +150,30 @@ const RoleList: React.FC = () => {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 whileHover={{ scale: 1.02, y: -5 }}
-                                className="bg-black/40 backdrop-blur-sm border border-purple-500/30 rounded-2xl p-6 cursor-pointer group"
+                                className="bg-sky-100 backdrop-blur-sm border border-slate-500 rounded-2xl p-6 cursor-pointer group"
                             >
                                 <div className="flex items-center justify-between mb-4">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-12 h-12 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl flex items-center justify-center">
-                                            <BadgeCheck className="w-6 h-6 text-purple-400" />
+                                        <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-slate-300">
+                                            <BadgeCheck className="w-6 h-6 text-slate-600" />
                                         </div>
                                         <div>
-                                            <h3 className="font-semibold text-white text-lg">
+                                            <h3 className="font-semibold text-xl text-slate-600">
                                                 {role.name}
                                             </h3>
-                                            <p className="text-xs text-white/40">ID: {role.id}</p>
+                                            <p className="text-xs text-slate-400">ID: {role.id}</p>
                                         </div>
                                     </div>
                                     <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
                                         <button
                                             onClick={() => openEditModal(role)}
-                                            className="p-2 bg-yellow-500/20 text-yellow-300 rounded-lg hover:bg-yellow-500/30 transition"
+                                            className="p-2 bg-yellow-500/20 text-slate-600 rounded-lg hover:bg-yellow-500/30 transition"
                                         >
                                             <Pencil className="w-4 h-4" />
                                         </button>
                                         <button
                                             onClick={() => deleteMutation.mutate(role.id)}
-                                            className="p-2 bg-red-500/20 text-red-300 rounded-lg hover:bg-red-500/30 transition"
+                                            className="p-2 bg-red-500/20 text-slate-600 rounded-lg hover:bg-red-500/30 transition"
                                         >
                                             <Trash2 className="w-4 h-4" />
                                         </button>
@@ -169,16 +181,16 @@ const RoleList: React.FC = () => {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <div className="flex items-center gap-2 text-white/60">
-                                        <Users className="w-4 h-4 text-purple-400" />
-                                        <span className="text-sm">Пользователей: <span className="text-purple-300 font-semibold">{usersCount}</span></span>
+                                    <div className="flex items-center gap-2 text-slate-600">
+                                        <Users className="w-4 h-4" />
+                                        <span className="text-sm">Пользователей: <span className="font-semibold">{usersCount}</span></span>
                                     </div>
                                 </div>
 
-                                <div className="mt-4 pt-3 border-t border-white/10">
+                                <div className="mt-4 pt-3 border-t border-slate-300">
                                     <button
                                         onClick={() => showRoleUsers(role)}
-                                        className="text-sm text-purple-400 hover:text-purple-300 transition flex items-center gap-1"
+                                        className="text-sm text-slate-600 hover:text-slate-800 transition flex items-center gap-1"
                                     >
                                         <Users className="w-4 h-4" />
                                         Просмотреть пользователей
@@ -190,10 +202,10 @@ const RoleList: React.FC = () => {
                 </div>
 
                 {filteredRoles?.length === 0 && (
-                    <div className="bg-black/40 backdrop-blur-sm border border-purple-500/30 rounded-2xl p-12 text-center">
+                    <div className="bg-sky-100 backdrop-blur-sm border border-slate-500 rounded-2xl p-12 text-center">
                         <div className="text-6xl mb-4">🏷️</div>
-                        <h3 className="text-xl font-semibold text-white mb-2">Роли не найдены</h3>
-                        <p className="text-white/40">Создайте первую роль</p>
+                        <h3 className="text-xl font-semibold text-slate-600 mb-2">Роли не найдены</h3>
+                        <p className="text-slate-500">Создайте первую роль</p>
                     </div>
                 )}
 
@@ -212,7 +224,7 @@ const RoleList: React.FC = () => {
                             <p className="text-white/40 text-center py-8">Нет пользователей с этой ролью</p>
                         ) : (
                             roleUsers.map(user => (
-                                <div key={user.id} className="flex items-center justify-between p-3 bg-white/5 rounded-xl">
+                                <div key={user.id} className="flex justify-between items-center p-3 bg-white/5 rounded-xl">
                                     <div>
                                         <p className="font-medium text-white">{user.name}</p>
                                         <p className="text-sm text-white/40">{user.groupName}</p>

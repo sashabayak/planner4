@@ -30,9 +30,9 @@ const RoleForm: React.FC<RoleFormProps> = ({
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 bg-sky-100 p-6 rounded-xl border border-slate-500 shadow-sm">
             <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-1">
+                <label htmlFor="name" className="block text-sm font-medium text-slate-600 mb-1">
                     Название роли *
                 </label>
                 <input
@@ -41,16 +41,24 @@ const RoleForm: React.FC<RoleFormProps> = ({
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-3 py-2 bg-white/5 border border-purple-500/30 rounded-lg text-white focus:outline-none focus:border-purple-500 transition-all"
+                    className="w-full px-3 py-2 bg-white/50 border border-slate-300 rounded-lg text-slate-700 focus:outline-none focus:border-slate-500 transition-all"
                     placeholder="Администратор"
                 />
             </div>
 
             <div className="flex justify-end gap-3 pt-4">
-                <button type="button" onClick={onCancel} className="px-4 py-2 bg-red-500/20 text-red-300 rounded-lg hover:bg-red-500/30 transition">
+                <button
+                    type="button"
+                    onClick={onCancel}
+                    className="px-4 py-2 bg-red-500/20 text-red-600 rounded-lg hover:bg-red-500/30 transition"
+                >
                     Отмена
                 </button>
-                <button type="submit" disabled={isLoading} className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:opacity-90 transition disabled:opacity-50">
+                <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg transition disabled:opacity-50"
+                >
                     {isLoading ? 'Сохранение...' : 'Сохранить'}
                 </button>
             </div>

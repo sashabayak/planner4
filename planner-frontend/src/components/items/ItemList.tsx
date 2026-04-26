@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { itemService } from '../../services/itemService';
@@ -24,7 +24,11 @@ const ItemList: React.FC = () => {
     const [selectedItemForTags, setSelectedItemForTags] = useState<Item | null>(null);
     const [allTags, setAllTags] = useState<Tag[]>([]);
     const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
-
+    const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
+    const [selectedTagId, setSelectedTagId] = useState<number | null>(null);
+    const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+    const [currentPage, setCurrentPage] = useState(0);
+    const itemsPerPage = 9;
     const { showSuccess, showError } = useToast();
     const queryClient = useQueryClient();
 
@@ -104,92 +108,83 @@ const ItemList: React.FC = () => {
     };
 
     const showItemUsers = (item: Item) => {
-        // В реальном API нужно получать пользователей, связанных с задачей
-        // Для демонстрации используем фильтрацию по items (если бы в User был массив items)
-        // Пока заглушка
-        setItemUsers([]);
         setSelectedItemForUsers(item);
+        setItemUsers(item.users || []);
         setShowUsersModal(true);
     };
 
     const showItemTags = async (item: Item) => {
         setSelectedItemForTags(item);
         setItemTags(item.tags || []);
-        setSelectedTagIds((item.tags || []).map(t => t.id));
         setAllTags(tags || []);
         setShowTagsModal(true);
     };
 
-const addTagToItem = (tagId: number) => {
-    console.log("addTagToItem вызван с tagId:", tagId);
-    console.log("allTags:", allTags);
-    console.log("itemTags до добавления:", itemTags);
+   const addTagToItem = async (tagId: number) => {
+       if (!selectedItemForTags) return;
+       const tag = allTags.find(t => t.id === tagId);
+       if (!tag) return;
+       try {
+           await itemService.addTagToItem(selectedItemForTags.id, tagId);
+           // Обновляем локальное состояние
+           setItemTags([...itemTags, tag]);
+           setSelectedTagIds([...selectedTagIds, tagId]);
+           showSuccess(`Тег "${tag.name}" добавлен`);
+           // Обновляем список задач
+           queryClient.invalidateQueries({ queryKey: ['items'] });
+       } catch (error) {
+           console.error(error);
+           showError('Ошибка при добавлении тега');
+       }
+   };
 
-    const tag = allTags.find(t => t.id === tagId);
-    console.log("Найденный тег:", tag);
+   const removeTagFromItem = async (tagId: number) => {
+       if (!selectedItemForTags) return;
+       const tag = itemTags.find(t => t.id === tagId);
+       if (!tag) return;
+       try {
+           await itemService.removeTagFromItem(selectedItemForTags.id, tagId);
+           setItemTags(itemTags.filter(t => t.id !== tagId));
+           setSelectedTagIds(selectedTagIds.filter(id => id !== tagId));
+           showSuccess(`Тег "${tag.name}" удалён`);
+           queryClient.invalidateQueries({ queryKey: ['items'] });
+       } catch (error) {
+           console.error(error);
+           showError('Ошибка при удалении тега');
+       }
+   };
 
-    if (tag && !itemTags.some(t => t.id === tagId)) {
-        const newItemTags = [...itemTags, tag];
-        const newSelectedTagIds = [...selectedTagIds, tagId];
+   const addUserToItem = async (userId: number) => {
+       if (!selectedItemForUsers) return;
+       const user = allUsers.find(u => u.id === userId);
+       if (!user) return;
+       try {
+           await userService.addItemToUser(userId, selectedItemForUsers.id);
+           setItemUsers([...itemUsers, user]);
+           setSelectedUserIds([...selectedUserIds, userId]);
+           showSuccess(`Пользователь "${user.name}" добавлен`);
+           queryClient.invalidateQueries({ queryKey: ['items'] });
+       } catch (error) {
+           console.error(error);
+           showError('Ошибка при добавлении пользователя');
+       }
+   };
 
-        console.log("Новый itemTags:", newItemTags);
-        console.log("Новый selectedTagIds:", newSelectedTagIds);
-
-        setItemTags(newItemTags);
-        setSelectedTagIds(newSelectedTagIds);
-    } else {
-        console.log("Тег не добавлен: либо не найден, либо уже существует");
-    }
-};
-
-const removeTagFromItem = (tagId: number) => {
-    setItemTags(itemTags.filter(t => t.id !== tagId));
-    setSelectedTagIds(selectedTagIds.filter(id => id !== tagId));
-};
-
-const saveTags = async () => {
-    if (!selectedItemForTags) return;
-
-    console.log("=== saveTags вызван ===");
-    console.log("selectedItemForTags.id:", selectedItemForTags.id);
-    console.log("selectedTagIds:", selectedTagIds);
-    console.log("itemTags:", itemTags);
-
-    console.log("currentTagIds (из itemTags):", currentTagIds);
-
-    console.log("toAdd:", toAdd);
-    console.log("toRemove:", toRemove);
-    console.log("Сохраняем теги для задачи:", selectedItemForTags.id);
-    console.log("Выбранные ID тегов:", selectedTagIds);
-
-    const currentTagIds = itemTags.map(t => t.id);
-
-    const toAdd = selectedTagIds.filter(id => !currentTagIds.includes(id));
-
-    const toRemove = currentTagIds.filter(id => !selectedTagIds.includes(id));
-
-    console.log("Добавить:", toAdd);
-    console.log("Удалить:", toRemove);
-
-    try {
-        for (const tagId of toAdd) {
-            console.log(`Добавляем тег ${tagId} к задаче ${selectedItemForTags.id}`);
-            await itemService.addTagToItem(selectedItemForTags.id, tagId);
-        }
-
-        for (const tagId of toRemove) {
-            console.log(`Удаляем тег ${tagId} у задачи ${selectedItemForTags.id}`);
-            await itemService.removeTagFromItem(selectedItemForTags.id, tagId);
-        }
-
-        showSuccess('Теги обновлены');
-        setShowTagsModal(false);
-        queryClient.invalidateQueries({ queryKey: ['items'] });
-    } catch (error) {
-        console.error("Ошибка при сохранении тегов:", error);
-        showError('Ошибка при сохранении тегов');
-    }
-};
+   const removeUserFromItem = async (userId: number) => {
+       if (!selectedItemForUsers) return;
+       const user = itemUsers.find(u => u.id === userId);
+       if (!user) return;
+       try {
+           await userService.removeItemFromUser(userId, selectedItemForUsers.id);
+           setItemUsers(itemUsers.filter(u => u.id !== userId));
+           setSelectedUserIds(selectedUserIds.filter(id => id !== userId));
+           showSuccess(`Пользователь "${user.name}" удалён`);
+           queryClient.invalidateQueries({ queryKey: ['items'] });
+       } catch (error) {
+           console.error(error);
+           showError('Ошибка при удалении пользователя');
+       }
+   };
 
     const filteredItems = items?.filter(item => {
         const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -197,7 +192,9 @@ const saveTags = async () => {
         const matchesStatus = statusFilter === 'all' ||
             (statusFilter === 'completed' && item.completed) ||
             (statusFilter === 'active' && !item.completed);
-        return matchesSearch && matchesStatus;
+        const matchesTag = selectedTagId ? item.tags?.some(tag => tag.id === selectedTagId) : true;
+        const matchesUser = selectedUserId ? item.users?.some(user => user.id === selectedUserId) : true;
+        return matchesSearch && matchesStatus && matchesTag && matchesUser;
     });
 
     const formatDate = (dateString: string) => {
@@ -212,172 +209,265 @@ const saveTags = async () => {
         }
     };
 
+    const totalPages = Math.ceil((filteredItems?.length || 0) / itemsPerPage);
+    const paginatedItems = filteredItems?.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage);
+
+    useEffect(() => {
+        setCurrentPage(0);
+    }, [searchTerm, statusFilter, selectedTagId, selectedUserId]);
+
     if (isLoading) return <LoadingSpinner />;
 
     return (
-        <div className="min-h-screen pt-20 px-4">
+        <div className="min-h-screen pt-6 px-4">
             <div className="container mx-auto">
-                <div className="flex justify-between items-center mb-8 flex-wrap gap-4">
+                <div className="flex justify-between items-center mb-8 flex-wrap gap-4 -mt-5">
                     <div>
-                        <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent">
+                        <h1 className="text-4xl font-bold text-slate-600">
                             Задачи
                         </h1>
-                        <p className="text-purple-300/70 mt-1">Управление задачами</p>
+                        <p className="text-slate-600 mt-3 text-xl mb-2 ">Управление задачами</p>
                     </div>
                     <button
                         onClick={openCreateModal}
-                        className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 shadow-lg shadow-purple-500/25"
+                        className="bg-slate-600 text-white px-6 py-3 rounded-xl font-semibold text-xl transition-all duration-300 flex items-center gap-2 shadow-lg shadow-slate-500/25"
                     >
-                        <Plus className="w-5 h-5" />
+                        <Plus className="w-6 h-6" />
                         Добавить задачу
                     </button>
                 </div>
 
-                {/* Filters */}
-                <div className="bg-black/40 backdrop-blur-sm border border-purple-500/30 rounded-xl p-6 mb-6">
-                    <div className="flex items-center gap-2 mb-4">
-                        <Search className="w-5 h-5 text-purple-400" />
-                        <h3 className="text-white font-semibold">Фильтры</h3>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-purple-400" />
-                            <input
-                                type="text"
-                                placeholder="Поиск по названию или описанию..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-9 pr-4 py-2 bg-white/5 border border-purple-500/30 rounded-lg text-white placeholder-white/30 focus:outline-none focus:border-purple-500 transition-all"
-                            />
-                        </div>
-                        <select
-                            value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value)}
-                            className="px-4 py-2 bg-white/5 border border-purple-500/30 rounded-lg text-white focus:outline-none focus:border-purple-500 transition-all"
+{/* Filters */}
+<div className=" bg-sky-100 backdrop-blur-sm  border border-slate-500 rounded-xl p-5 mb-12">
+    <div className="flex items-center gap-2 mb-4">
+        <h3 className="text-slate-600 text-xl font-semibold">Фильтры</h3>
+    </div>
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-start">
+        {/* Поиск по названию */}
+        <div className="relative ">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-600" />
+            <input
+                type="text "
+                placeholder="Название или описание..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className=" pl-9 pr-4 py-2 text-lg bg-white/5 border border-slate-300 rounded-lg text-slate-600 placeholder-slate-600 focus:outline-none focus:border-slate-500 transition-all"
+            />
+        </div>
+
+        {/* Фильтр по статусу - список кнопок (ЗАМЕНА select) */}
+        <div>
+            <div className="flex  items-center gap-4">
+            <label className="block text-lg font-medium text-slate-600 mb-0">Статус:</label>
+                <button
+                    type="button"
+                    onClick={() => setStatusFilter('active')}
+                    className={`px-3 py-2 rounded-lg text-s font-medium transition-all duration-200 ${
+                        statusFilter === 'active'
+                            ? 'bg-slate-600 text-white border-2 border-slate-600'
+                            : 'bg-transparent text-slate-600 border-2 border-slate-400 hover:bg-slate-600'
+                    }`}
+                >
+                    Активные
+                </button>
+                <button
+                    type="button"
+                    onClick={() => setStatusFilter('completed')}
+                    className={`px-3 py-2 rounded-lg text-s font-medium transition-all duration-200 ${
+                        statusFilter === 'completed'
+                            ? 'bg-slate-600 text-white border-2 border-slate-600'
+                            : 'bg-transparent text-slate-600 border-2 border-slate-400 hover:bg-slate-600'
+                    }`}
+                >
+                    Выполненные
+                </button>
+            </div>
+                {/* Кнопка сброса – отдельная строка, на всю ширину */}
+                {(searchTerm || statusFilter !== 'all') && (
+                    <div className="mt-4">
+                        <button
+                            onClick={() => {
+                                setSearchTerm('');
+                                setStatusFilter('all');
+                            }}
+                            className="w-full px-4 py-2 bg-red-500/20 text-red-300 rounded-lg hover:bg-red-500/30 transition flex items-center justify-center gap-2 mt-4"
                         >
-                            <option value="all">Все задачи</option>
-                            <option value="active">Активные</option>
-                            <option value="completed">Выполненные</option>
-                        </select>
-                        {(searchTerm || statusFilter !== 'all') && (
-                            <button
-                                onClick={() => {
-                                    setSearchTerm('');
-                                    setStatusFilter('all');
-                                }}
-                                className="px-4 py-2 bg-red-500/20 text-red-300 rounded-lg hover:bg-red-500/30 transition flex items-center justify-center gap-2"
-                            >
-                                <X className="w-4 h-4" />
-                                Сбросить
-                            </button>
-                        )}
+                            <X className="w-4 h-4" />
+                            Сбросить
+                        </button>
                     </div>
-                </div>
+                )}
+        </div>
+            {/* Колонка 3: Тег */}
+            <div className = "flex items-center gap-2">
+            <label className="block text-lg font-medium text-slate-600 mb-0">Тег:</label>
+                <select  value={selectedTagId ?? ''}
+                                onChange={(e) => setSelectedTagId(e.target.value ? Number(e.target.value) : null)}
+                                className="px-3 py-2 bg-white/5 border border-slate-300 rounded-lg text-slate-600 text-lg focus:outline-none focus:border-slate-500">
+                    <option value="">Все теги</option>
+                    {tags?.map(tag => <option key={tag.id} value={tag.id}>#{tag.name}</option>)}
+                </select>
+            </div>
+            {/* Колонка 4: Пользователь */}
+            <div className = "flex items-center gap-2">
+                <label className="block text-lg font-medium text-slate-600 mb-1">Пользователь:</label>
+                <select
+                    value={selectedUserId ?? ''}
+                    onChange={(e) => setSelectedUserId(e.target.value ? Number(e.target.value) : null)}
+                    className="w-full px-3 py-2 bg-white/5 border border-slate-300 rounded-lg text-slate-600 text-lg focus:outline-none focus:border-slate-500"
+                >
+                    <option value="">Все пользователи</option>
+                    {allUsers?.map(user => (
+                        <option key={user.id} value={user.id}>{user.name}</option>
+                    ))}
+                </select>
+            </div>
+            </div>
+    </div>
+
 
                 {/* Items Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredItems?.map((item) => (
+                <div className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {paginatedItems?.map((item) => (
                         <motion.div
                             key={item.id}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             whileHover={{ scale: 1.02, y: -5 }}
-                            className={`bg-black/40 backdrop-blur-sm border rounded-2xl p-6 cursor-pointer group ${
-                                item.completed ? 'border-green-500/30' : 'border-purple-500/30'
+                            className={` bg-sky-100 backdrop-blur-sm border border-slate-500 rounded-2xl p-6 cursor-pointer group ${
+                                item.completed ? 'border-green-500/30' : 'border-slate-300'
                             }`}
                         >
-                            <div className="flex items-center justify-between mb-4">
-                                <div className="flex items-center gap-3">
-                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                                        item.completed ? 'bg-green-500/20' : 'bg-gradient-to-br from-purple-500/20 to-pink-500/20'
-                                    }`}>
-                                        {item.completed ? (
-                                            <CheckCircle className="w-6 h-6 text-green-400" />
-                                        ) : (
-                                            <CheckSquare className="w-6 h-6 text-purple-400" />
-                                        )}
-                                    </div>
-                                    <div>
-                                        <h3 className={`font-semibold text-lg ${item.completed ? 'text-green-300 line-through' : 'text-white'}`}>
-                                            {item.name}
-                                        </h3>
-                                        <p className="text-xs text-white/40">ID: {item.id}</p>
-                                    </div>
-                                </div>
-                                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                                    <button
-                                        onClick={() => toggleComplete(item)}
-                                        className="p-2 bg-green-500/20 text-green-300 rounded-lg hover:bg-green-500/30 transition"
-                                        title={item.completed ? "Отметить как невыполненную" : "Отметить как выполненную"}
-                                    >
-                                        {item.completed ? <Circle className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
-                                    </button>
-                                    <button
-                                        onClick={() => openEditModal(item)}
-                                        className="p-2 bg-yellow-500/20 text-yellow-300 rounded-lg hover:bg-yellow-500/30 transition"
-                                    >
-                                        <Pencil className="w-4 h-4" />
-                                    </button>
-                                    <button
-                                        onClick={() => deleteMutation.mutate(item.id)}
-                                        className="p-2 bg-red-500/20 text-red-300 rounded-lg hover:bg-red-500/30 transition"
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            </div>
 
-                            {item.description && (
-                                <p className="text-white/60 text-sm mb-3 line-clamp-2">
-                                    {item.description}
-                                </p>
-                            )}
+                            <div className="flex justify-between items-start">
+                               {/* Левая часть: иконка и название */}
+                               <div className="flex items-center gap-3">
+                               <button
+                                 onClick={() => toggleComplete(item)}
+                                 className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                                    item.completed ? 'bg-green-500/20' : 'bg-slate-300'
+                                   }`}>
+                                    {item.completed ? (
+                                   <CheckCircle className="w-6 h-6 text-green-400" />
+                                    ) : (
+                                     <CheckSquare className="w-6 h-6 text-slate-600" />
+                                    )}
+                               </button>
 
-                            <div className="space-y-2">
-                                <div className="flex items-center gap-2 text-white/60">
-                                    <Calendar className="w-4 h-4 text-purple-400" />
-                                    <span className="text-sm">Создана: {formatDate(item.createdAt)}</span>
+                                   <div className = "flex flex-col">
+                                   <div>
+                                       <h3 className={`font-semibold text-xl ${item.completed ? 'text-green-300 line-through' : 'text-slate-600'}`}>
+                                           {item.name}
+                                       </h3>
+                                   </div>
+                                   <div className="mt-1">
+                                    {item.description && (
+                                        <p className="text-slate-600 text-lg mb-0 line-clamp-2">
+                                            {item.description}
+                                        </p>
+                                    )}
+
+                                   </div>
+                                   </div>
+                               </div>
+
+                               {/* Правая часть: колонка с тегами (сверху) и иконками (снизу) */}
+                               <div className="flex flex-col items-end gap-2">
+                               <div className="flex flex-wrap gap-2">
                                 </div>
-                            </div>
+                                   {/* Теги – в правом верхнем углу */}
+                                   {item.tags && item.tags.length > 0 && (
+                                       <div className="pt-3 flex flex-wrap gap-1 justify-end">
+                                           {item.tags.map(tag => (
+                                               <span key={tag.id} className="text-s px-2 py-0.5 bg-slate-500/20 text-slate-600 rounded-full whitespace-nowrap">
+                                                   #{tag.name}
+                                               </span>
+                                           ))}
+                                       </div>
+                                   )}
+                                   {/* Иконки действий */}
+                                   <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                       <button
+                                           onClick={() => openEditModal(item)}
+                                           className="p-2 bg-yellow-500/20 text-slate-600 rounded-lg hover:bg-yellow-500/30 transition"
+                                       >
+                                           <Pencil className="w-4 h-4" />
+                                       </button>
+                                       <button
+                                           onClick={() => deleteMutation.mutate(item.id)}
+                                           className="p-2 bg-red-500/20 text-slate-600 rounded-lg hover:bg-red-500/30 transition"
+                                       >
+                                           <Trash2 className="w-4 h-4" />
+                                       </button>
+                                   </div>
+                                   <button
+                                     onClick={() => showItemTags(item)}
+                                     className="text-sm text-slate-600 hover:text-slate-600 transition flex items-center gap-1"
+                                     >
+                                   <TagIcon className="w-4 h-4" />
+                                    Теги {item.tags && item.tags.length > 0 && `(${item.tags.length})`}
+                                 </button>
+                               </div>
+                           </div>
 
                             <div className="mt-4 pt-3 border-t border-white/10 flex flex-wrap gap-2">
                                 <button
                                     onClick={() => showItemUsers(item)}
-                                    className="text-sm text-purple-400 hover:text-purple-300 transition flex items-center gap-1"
+                                    className="text-sm text-slate-600 hover:text-slate-600 transition flex items-center gap-1"
                                 >
                                     <Users className="w-4 h-4" />
                                     Пользователи
                                 </button>
-                                <button
-                                    onClick={() => showItemTags(item)}
-                                    className="text-sm text-purple-400 hover:text-purple-300 transition flex items-center gap-1"
-                                >
-                                    <TagIcon className="w-4 h-4" />
-                                    Теги {item.tags && item.tags.length > 0 && `(${item.tags.length})`}
-                                </button>
-                            </div>
-
-                            {/* Tags preview */}
-                            {item.tags && item.tags.length > 0 && (
-                                <div className="mt-2 flex flex-wrap gap-1">
-                                    {item.tags.map(tag => (
-                                        <span key={tag.id} className="text-xs px-2 py-0.5 bg-purple-500/20 text-purple-300 rounded-full">
-                                            #{tag.name}
-                                        </span>
+                                </div>
+                            {/* Users preview  */}
+                            {item.users && item.users.length > 0 && (
+                                <div className="mt-2 flex flex-wrap gap-3">
+                                    {item.users.map(user => (
+                                       <div key={user.id} className="flex flex-col items-center text-center">
+                                           <div className="w-8 h-8 rounded-full bg-slate-300 flex items-center justify-center text-sm font-bold text-slate-600 shadow-sm">
+                                               {user.name.charAt(0).toUpperCase()}
+                                           </div>
+                                           <span className="text-[15px] text-slate-600 mt-1  max-w-[80px] text-center">
+                                               {user.name}
+                                           </span>
+                                           <span className="text-[12px] text-slate-600">{user.roleName}</span>
+                                       </div>
                                     ))}
                                 </div>
                             )}
+
                         </motion.div>
                     ))}
                 </div>
 
                 {filteredItems?.length === 0 && (
                     <div className="bg-black/40 backdrop-blur-sm border border-purple-500/30 rounded-2xl p-12 text-center">
-                        <div className="text-6xl mb-4">✅</div>
+                        <div className="text-6xl mb-4">ок</div>
                         <h3 className="text-xl font-semibold text-white mb-2">Задачи не найдены</h3>
                         <p className="text-white/40">Создайте первую задачу</p>
                     </div>
                 )}
+            {totalPages > 1 && (
+                <div className="flex justify-center items-center gap-4 mt-8">
+                    <button
+                        onClick={() => setCurrentPage(p => p - 1)}
+                        disabled={currentPage === 0}
+                        className="px-4 py-2 bg-white/5 border border-slate-300 rounded-lg text-slate-600 disabled:opacity-30 hover:bg-slate-100"
+                    >
+                        ← Предыдущая
+                    </button>
+                    <span className="text-slate-600">
+                        Страница {currentPage + 1} из {totalPages}
+                    </span>
+                    <button
+                        onClick={() => setCurrentPage(p => p + 1)}
+                        disabled={currentPage + 1 >= totalPages}
+                        className="px-4 py-2 bg-white/5 border border-slate-300 rounded-lg text-slate-600 disabled:opacity-30 hover:bg-slate-100"
+                    >
+                        Следующая →
+                    </button>
+                </div>
+            )}
 
                 {/* Modal for Create/Edit */}
                 <Modal isOpen={isModalOpen} onClose={closeModal} title={selectedItem ? 'Редактирование задачи' : 'Добавление задачи'}>
@@ -395,21 +485,23 @@ const saveTags = async () => {
                         <div>
                             <label className="block text-sm font-medium text-gray-300 mb-2">Добавить тег</label>
                             <div className="flex gap-2">
-                                <select
-                                    value=""
-                                    onChange={(e) => {
-                                        if (e.target.value) {
-                                            addTagToItem(Number(e.target.value));
-                                            e.target.value = '';
-                                        }
-                                    }}
-                                    className="flex-1 px-3 py-2 bg-white/5 border border-purple-500/30 rounded-lg text-white focus:outline-none focus:border-purple-500"
-                                >
-                                    <option value="">Выберите тег</option>
-                                    {allTags.filter(t => !itemTags.some(it => it.id === t.id)).map(tag => (
-                                        <option key={tag.id} value={tag.id}>{tag.name}</option>
-                                    ))}
-                                </select>
+                             <div className="space-y-2 max-h-40 overflow-y-auto">
+                                 <label className="block text-sm font-medium text-gray-300 mb-2">Доступные теги</label>
+                                 {allTags.filter(t => !itemTags.some(it => it.id === t.id)).length === 0 ? (
+                                     <p className="text-white/40 text-sm">Нет доступных тегов</p>
+                                 ) : (
+                                     allTags.filter(t => !itemTags.some(it => it.id === t.id)).map(tag => (
+                                         <button
+                                             key={tag.id}
+                                             onClick={() => addTagToItem(tag.id)}
+                                             className="w-full text-left px-3 py-2 bg-white/5 hover:bg-purple-500/30 rounded-lg text-white transition flex justify-between items-center group"
+                                         >
+                                             <span>#{tag.name}</span>
+                                             <span className="text-purple-400 opacity-0 group-hover:opacity-100">+ Добавить</span>
+                                         </button>
+                                     ))
+                                 )}
+                             </div>
                             </div>
                         </div>
 
@@ -436,29 +528,54 @@ const saveTags = async () => {
 
                         <div className="flex justify-end gap-3 pt-4">
                             <button onClick={() => setShowTagsModal(false)} className="px-4 py-2 bg-red-500/20 text-red-300 rounded-lg">Отмена</button>
-                            <button onClick={saveTags} className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg">Сохранить</button>
                         </div>
                     </div>
                 </Modal>
 
                 {/* Modal for Users */}
-                <Modal isOpen={showUsersModal} onClose={() => setShowUsersModal(false)} title={`Пользователи, связанные с задачей: ${selectedItemForUsers?.name}`} size="lg">
-                    <div className="space-y-3">
-                        {itemUsers.length === 0 ? (
-                            <p className="text-white/40 text-center py-8">Нет пользователей, связанных с этой задачей</p>
-                        ) : (
-                            itemUsers.map(user => (
-                                <div key={user.id} className="flex items-center justify-between p-3 bg-white/5 rounded-xl">
-                                    <div>
-                                        <p className="font-medium text-white">{user.name}</p>
-                                        <p className="text-sm text-white/40">{user.roleName} • {user.groupName}</p>
-                                    </div>
-                                    <span className="text-xs text-purple-400">ID: {user.id}</span>
-                                </div>
-                            ))
-                        )}
-                    </div>
-                </Modal>
+               <Modal isOpen={showUsersModal} onClose={() => setShowUsersModal(false)} title={`Пользователи, связанные с задачей: ${selectedItemForUsers?.name}`} size="lg">
+                   <div className="space-y-4">
+                       <div>
+                           <label className="block text-sm font-medium text-gray-300 mb-2">Добавить пользователя</label>
+                           <div className="space-y-2 max-h-40 overflow-y-auto">
+                               {allUsers.filter(u => !itemUsers.some(iu => iu.id === u.id)).length === 0 ? (
+                                   <p className="text-white/40 text-sm">Нет доступных пользователей</p>
+                               ) : (
+                                   allUsers.filter(u => !itemUsers.some(iu => iu.id === u.id)).map(user => (
+                                       <button
+                                           key={user.id}
+                                           onClick={() => addUserToItem(user.id)}
+                                           className="w-full text-left px-3 py-2 bg-white/5 hover:bg-purple-500/30 rounded-lg text-white transition flex justify-between items-center group"
+                                       >
+                                           <span>{user.name}</span>
+                                           <span className="text-purple-400 opacity-0 group-hover:opacity-100">+ Добавить</span>
+                                       </button>
+                                   ))
+                               )}
+                           </div>
+                       </div>
+
+                       <div>
+                           <label className="block text-sm font-medium text-gray-300 mb-2">Текущие пользователи</label>
+                           <div className="space-y-2">
+                               {itemUsers.length === 0 ? (
+                                   <p className="text-white/40 text-center py-4">Нет пользователей</p>
+                               ) : (
+                                   itemUsers.map(user => (
+                                       <div key={user.id} className="flex justify-between items-center p-2 bg-white/5 rounded-lg">
+                                           <span className="text-white">{user.name} — {user.roleName} ({user.groupName})</span>
+                                           <button onClick={() => removeUserFromItem(user.id)} className="text-red-400 hover:text-red-300">✕</button>
+                                       </div>
+                                   ))
+                               )}
+                           </div>
+                       </div>
+
+                       <div className="flex justify-end gap-3 pt-4">
+                           <button onClick={() => setShowUsersModal(false)} className="px-4 py-2 bg-red-500/20 text-red-300 rounded-lg">Закрыть</button>
+                       </div>
+                   </div>
+               </Modal>
             </div>
         </div>
     );

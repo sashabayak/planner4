@@ -8,18 +8,35 @@ import org.springframework.stereotype.Component;
 @Component
 public class ItemMapper {
 
-  public ItemDTO toDto(Item item) {
-	if (item == null) {
-	  return null;
-	}
+  private final UserMapper userMapper;
 
-	return ItemDTO.builder()
+  public ItemMapper(UserMapper userMapper) {
+	this.userMapper = userMapper;
+  }
+
+  public ItemDTO toDto(Item item) {
+	if (item == null) return null;
+
+	ItemDTO.ItemDTOBuilder builder = ItemDTO.builder()
 		.id(item.getId())
 		.name(item.getName())
 		.description(item.getDescription())
 		.completed(item.isCompleted())
-		.createdAt(item.getCreatedAt())
-		.build();
+		.createdAt(item.getCreatedAt());
+
+	if (item.getTags() != null && !item.getTags().isEmpty()) {
+	  builder.tags(item.getTags().stream()
+		  .map(TagMapper::toDto)
+		  .toList());
+	}
+
+	if (item.getUsers() != null && !item.getUsers().isEmpty()) {
+	  builder.users(item.getUsers().stream()
+		  .map(userMapper::toDto)
+		  .toList());
+	}
+
+	return builder.build();
   }
 
   public Item toEntity(ItemCreateDTO item) {

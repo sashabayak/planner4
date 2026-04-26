@@ -10,12 +10,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserMapper {
 
-  private final ItemMapper itemMapper;
-
-  public UserMapper(ItemMapper itemMapper) {
-	this.itemMapper = itemMapper;
-  }
-
   public UserDTO toDto(User user) {
 	if (user == null) {
 	  return null;
@@ -34,12 +28,6 @@ public class UserMapper {
 	if (user.getRole() != null) {
 	  builder.roleId(user.getRole().getId())
 		  .roleName(user.getRole().getName());
-	}
-
-	if (user.getItems() != null && !user.getItems().isEmpty()) {
-	  builder.items(user.getItems().stream()
-		  .map(itemMapper::toDto)
-		  .toList());
 	}
 
 	return builder.build();

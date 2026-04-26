@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import com.example.planner.repository.TagRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,9 @@ public class ItemService {
   private final ItemRepository repository;
   private final ItemMapper mapper;
   private final TagRepository tagRepository;
+
+  @PersistenceContext
+  private EntityManager entityManager;
 
   public List<ItemDTO> getAllItems() {
 	return repository.findAll()
@@ -59,12 +64,19 @@ public class ItemService {
 
   @Transactional
   public boolean deleteItem(Long id) {
-	if (repository.existsById(id)) {
-	  repository.deleteById(id);
-	  return true;
+	if (!repository.existsById(id)) {
+	  return false;
 	}
-	return false;
+	entityManager.createNativeQuery("DELETE FROM user_item WHERE item_id = :itemId")
+		.setParameter("itemId", id)
+		.executeUpdate();
+	entityManager.createNativeQuery("DELETE FROM item_tag WHERE item_id = :itemId")
+		.setParameter("itemId", id)
+		.executeUpdate();
+	repository.deleteById(id);
+	return true;
   }
+
   public Item getItemEntityById(Long id) {
 	return repository.findById(id)
 		.orElseThrow(() -> new NoSuchElementException("Задача с ID " + id + " не найдена"));
@@ -75,8 +87,10 @@ public class ItemService {
 	Item item = getItemEntityById(itemId);
 	Tag tag = tagRepository.findById(tagId)
 		.orElseThrow(() -> new NoSuchElementException("Тег с ID " + tagId + " не найден"));
-	item.getTags().add(tag);
-	repository.save(item);
+	 if (!item.getTags().contains(tag)) {
+	   item.getTags().add(tag);
+	   repository.save(item);
+	 }
   }
 
   @Transactional

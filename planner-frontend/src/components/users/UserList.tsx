@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { userService } from '../../services/userService';
 import { groupService } from '../../services/groupService';
 import { roleService } from '../../services/roleService';
-import { User, UserCreateDto, Group, Role, Item } from '../../types';import { useToast } from '../../hooks/useToast';
+import { User, UserCreateDto, Group, Role, Item } from '../../types';
+import { useToast } from '../../hooks/useToast';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { Modal } from '../common/Modal';
 import { UserForm } from './UserForm';
@@ -33,6 +34,7 @@ const UserList: React.FC = () => {
     const [userItems, setUserItems] = useState<Item[]>([]);
     const [allItems, setAllItems] = useState<Item[]>([]);
     const [selectedItemIds, setSelectedItemIds] = useState<number[]>([]);
+
     const [formData, setFormData] = useState<UserCreateDto>({
         name: '',
         birthDate: '',
@@ -40,6 +42,8 @@ const UserList: React.FC = () => {
         groupId: 0,
     });
     const [editingId, setEditingId] = useState<number | null>(null);
+    const [currentPage, setCurrentPage] = useState(0);
+    const itemsPerPage = 9;
 
     const { showSuccess, showError } = useToast();
     const queryClient = useQueryClient();
@@ -117,72 +121,50 @@ const UserList: React.FC = () => {
         setSelectedUser(null);
     };
 
-const showUserItems = async (user: User) => {
-    console.log("=== showUserItems НАЧАЛО ===");
-    console.log("user.id:", user.id);
-
-    try {
-        const freshUser = await userService.getById(user.id);
-        console.log("freshUser:", freshUser);
-        console.log("freshUser.items:", freshUser.items);
-
-        setSelectedUserForItems(freshUser);
-        setUserItems(freshUser.items || []);
-        setSelectedItemIds((freshUser.items || []).map(i => i.id));
-        setAllItems(items || []);
-        setShowUserItemsModal(true);
-    } catch (error) {
-        console.error("Ошибка при загрузке пользователя:", error);
-        // Fallback - используем то, что есть
-        setSelectedUserForItems(user);
-        setUserItems(user.items || []);
-        setSelectedItemIds((user.items || []).map(i => i.id));
-        setAllItems(items || []);
-        setShowUserItemsModal(true);
-    }
-};
-
-const saveUserItems = async () => {
-    if (!selectedUserForItems) return;
-
-    console.log("=== saveUserItems ПРИНУДИТЕЛЬНОЕ ДОБАВЛЕНИЕ ===");
-    console.log("selectedItemIds:", selectedItemIds);
-
-    try {
-        for (const itemId of selectedItemIds) {
-            console.log(`ПРИНУДИТЕЛЬНО добавляем задачу ${itemId} пользователю ${selectedUserForItems.id}`);
-            await userService.addItemToUser(selectedUserForItems.id, itemId);
+    const showUserItems = async (user: User) => {
+        try {
+            const freshUser = await userService.getById(user.id);
+            setSelectedUserForItems(freshUser);
+            setUserItems(freshUser.items || []);
+            setSelectedItemIds((freshUser.items || []).map(i => i.id));
+            setAllItems(items || []);
+            setShowUserItemsModal(true);
+        } catch (error) {
+            setSelectedUserForItems(user);
+            setUserItems(user.items || []);
+            setSelectedItemIds((user.items || []).map(i => i.id));
+            setAllItems(items || []);
+            setShowUserItemsModal(true);
         }
+    };
 
-        showSuccess('Задачи пользователя обновлены');
-        setShowUserItemsModal(false);
-        queryClient.invalidateQueries({ queryKey: ['users'] });
-        queryClient.invalidateQueries({ queryKey: ['items'] });
-    } catch (error) {
-        console.error("Ошибка:", error);
-        showError('Ошибка при сохранении');
-    }
-};
+    const saveUserItems = async () => {
+        if (!selectedUserForItems) return;
+        try {
+            for (const itemId of selectedItemIds) {
+                await userService.addItemToUser(selectedUserForItems.id, itemId);
+            }
+            showSuccess('Задачи пользователя обновлены');
+            setShowUserItemsModal(false);
+            queryClient.invalidateQueries({ queryKey: ['users'] });
+            queryClient.invalidateQueries({ queryKey: ['items'] });
+        } catch (error) {
+            showError('Ошибка при сохранении');
+        }
+    };
 
-const addItemToUser = (itemId: number) => {
-    console.log("addItemToUser вызван с itemId:", itemId);
-    const item = allItems.find(i => i.id === itemId);
-    console.log("Найденный item:", item);
+    const addItemToUser = (itemId: number) => {
+        const item = allItems.find(i => i.id === itemId);
+        if (item && !userItems.some(i => i.id === itemId)) {
+            setUserItems([...userItems, item]);
+            setSelectedItemIds([...selectedItemIds, itemId]);
+        }
+    };
 
-    if (item && !userItems.some(i => i.id === itemId)) {
-        console.log("Добавляем задачу в локальный список");
-        setUserItems([...userItems, item]);
-        setSelectedItemIds([...selectedItemIds, itemId]);
-    } else {
-        console.log("Задача не добавлена (уже есть или не найдена)");
-    }
-};
-
-const removeItemFromUser = (itemId: number) => {
-    console.log("removeItemFromUser вызван с itemId:", itemId);
-    setUserItems(userItems.filter(i => i.id !== itemId));
-    setSelectedItemIds(selectedItemIds.filter(id => id !== itemId));
-};
+    const removeItemFromUser = (itemId: number) => {
+        setUserItems(userItems.filter(i => i.id !== itemId));
+        setSelectedItemIds(selectedItemIds.filter(id => id !== itemId));
+    };
 
     const handleSubmit = (data: UserCreateDto) => {
         if (editingId) {
@@ -199,7 +181,15 @@ const removeItemFromUser = (itemId: number) => {
         return matchesSearch && matchesGroup && matchesRole;
     });
 
+    const totalPages = Math.ceil((filteredUsers?.length || 0) / itemsPerPage);
+    const paginatedUsers = filteredUsers?.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage);
+
+    useEffect(() => {
+        setCurrentPage(0);
+    }, [searchTerm, groupFilter, roleFilter]);
+
     const formatDate = (dateString: string) => {
+        if (!dateString) return 'Дата не указана';
         try {
             return new Date(dateString).toLocaleDateString('ru-RU', {
                 day: 'numeric',
@@ -214,66 +204,98 @@ const removeItemFromUser = (itemId: number) => {
     if (usersLoading) return <LoadingSpinner />;
 
     return (
-        <div className="min-h-screen pt-20 px-4">
+        <div className="min-h-screen pt-6 px-4">
             <div className="container mx-auto">
-                {/* Header */}
                 <div className="flex justify-between items-center mb-8 flex-wrap gap-4">
                     <div>
-                        <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent">
-                            Пользователи
-                        </h1>
-                        <p className="text-purple-300/70 mt-1">Управление пользователями системы</p>
+                        <h1 className="text-4xl font-bold text-slate-600">Пользователи</h1>
+                        <p className="text-slate-600 mt-3 text-xl">Управление пользователями системы</p>
                     </div>
                     <button
                         onClick={openCreateModal}
-                        className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 shadow-lg shadow-purple-500/25"
+                        className="bg-slate-600 hover:bg-slate-700 text-white px-6 py-3 rounded-xl font-semibold text-xl transition-all duration-300 flex items-center gap-2 shadow-md"
                     >
-                        <Plus className="w-5 h-5" />
+                        <Plus className="w-6 h-6" />
                         Добавить пользователя
                     </button>
                 </div>
 
-                {/* Filters */}
-                <div className="bg-black/40 backdrop-blur-sm border border-purple-500/30 rounded-xl p-6 mb-6">
+                {/* Фильтры */}
+                <div className="bg-sky-100 backdrop-blur-sm border border-slate-500 rounded-xl p-5 mb-16">
                     <div className="flex items-center gap-2 mb-4">
-                        <Search className="w-5 h-5 text-purple-400" />
-                        <h3 className="text-white font-semibold">Фильтры</h3>
+                        <h3 className="text-slate-600 text-xl font-semibold">Фильтры</h3>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-start">
                         <div className="relative">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-purple-400" />
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-600" />
                             <input
                                 type="text"
                                 placeholder="Поиск по имени..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-9 pr-4 py-2 bg-white/5 border border-purple-500/30 rounded-lg text-white placeholder-white/30 focus:outline-none focus:border-purple-500 transition-all"
+                                className="w-full pl-9 pr-4 py-2 text-lg bg-white/5 border border-slate-300 rounded-lg text-slate-600 placeholder-slate-600 focus:outline-none focus:border-slate-500 transition-all"
                             />
                         </div>
-                        <select
-                            value={groupFilter}
-                            onChange={(e) => setGroupFilter(e.target.value)}
-                            className="px-4 py-2 bg-white/5 border border-purple-500/30 rounded-lg text-white focus:outline-none focus:border-purple-500 transition-all"
-                        >
-                            <option value="all">Все группы</option>
-                            {groups?.map((group) => (
-                                <option key={group.id} value={group.id.toString()}>
-                                    {group.name}
-                                </option>
-                            ))}
-                        </select>
-                        <select
-                            value={roleFilter}
-                            onChange={(e) => setRoleFilter(e.target.value)}
-                            className="px-4 py-2 bg-white/5 border border-purple-500/30 rounded-lg text-white focus:outline-none focus:border-purple-500 transition-all"
-                        >
-                            <option value="all">Все роли</option>
-                            {roles?.map((role) => (
-                                <option key={role.id} value={role.id.toString()}>
-                                    {role.name}
-                                </option>
-                            ))}
-                        </select>
+                        <div>
+                            <label className="block text-[17px] font-medium text-slate-600 mb-1 -mt-5">Группа</label>
+                            <div className="grid grid-cols-2 gap-1 max-h-32 overflow-y-auto p-1 bg-white/5 rounded-lg border border-slate-300">
+                                <button
+                                    type="button"
+                                    onClick={() => setGroupFilter('all')}
+                                    className={`px-2 py-1 rounded-lg text-xs transition ${
+                                        groupFilter === 'all'
+                                            ? 'bg-slate-600 text-white'
+                                            : 'bg-white text-slate-600 border border-slate-300 hover:bg-slate-100'
+                                    }`}
+                                >
+                                    Все
+                                </button>
+                                {groups?.map((group) => (
+                                    <button
+                                        key={group.id}
+                                        type="button"
+                                        onClick={() => setGroupFilter(group.id.toString())}
+                                        className={`px-2 py-1 rounded-lg text-xs transition ${
+                                            groupFilter === group.id.toString()
+                                                ? 'bg-slate-600 text-white'
+                                                : 'bg-white text-slate-600 border border-slate-300 hover:bg-slate-100'
+                                        }`}
+                                    >
+                                        {group.name}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                        <div>
+                            <label className="block text-[17px] font-medium text-slate-600 mb-1 -mt-5">Роль</label>
+                            <div className="grid grid-cols-2 gap-1 max-h-32 overflow-y-auto p-1 bg-white/5 rounded-lg border border-slate-300">
+                                <button
+                                    type="button"
+                                    onClick={() => setRoleFilter('all')}
+                                    className={`px-2 py-1 rounded-lg text-xs transition ${
+                                        roleFilter === 'all'
+                                            ? 'bg-slate-600 text-white'
+                                            : 'bg-white text-slate-600 border border-slate-300 hover:bg-slate-100'
+                                    }`}
+                                >
+                                    Все
+                                </button>
+                                {roles?.map((role) => (
+                                    <button
+                                        key={role.id}
+                                        type="button"
+                                        onClick={() => setRoleFilter(role.id.toString())}
+                                        className={`px-2 py-1 rounded-lg text-xs transition ${
+                                            roleFilter === role.id.toString()
+                                                ? 'bg-slate-600 text-white'
+                                                : 'bg-white text-slate-600 border border-slate-300 hover:bg-slate-100'
+                                        }`}
+                                    >
+                                        {role.name}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
                         {(searchTerm || groupFilter !== 'all' || roleFilter !== 'all') && (
                             <button
                                 onClick={() => {
@@ -281,7 +303,7 @@ const removeItemFromUser = (itemId: number) => {
                                     setGroupFilter('all');
                                     setRoleFilter('all');
                                 }}
-                                className="px-4 py-2 bg-red-500/20 text-red-300 rounded-lg hover:bg-red-500/30 transition flex items-center justify-center gap-2"
+                                className="px-4 py-2 bg-red-500/20 text-red-300 rounded-lg hover:bg-red-500/30 transition flex items-center justify-center gap-2 self-end"
                             >
                                 <X className="w-4 h-4" />
                                 Сбросить
@@ -290,38 +312,38 @@ const removeItemFromUser = (itemId: number) => {
                     </div>
                 </div>
 
-                {/* Users Grid */}
+                {/* Сетка пользователей */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredUsers?.map((user) => (
+                    {paginatedUsers?.map((user) => (
                         <motion.div
                             key={user.id}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             whileHover={{ scale: 1.02, y: -5 }}
-                            className="bg-black/40 backdrop-blur-sm border border-purple-500/30 rounded-2xl p-6 cursor-pointer group"
+                            className="bg-sky-100 backdrop-blur-sm border border-slate-500 rounded-2xl p-6 cursor-pointer group"
                         >
                             <div className="flex items-center justify-between mb-4">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl flex items-center justify-center">
-                                        <Users className="w-6 h-6 text-purple-400" />
+                                    <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-slate-300">
+                                        <Users className="w-6 h-6 text-slate-600" />
                                     </div>
                                     <div>
-                                        <h3 className="font-semibold text-white text-lg">
+                                        <h3 className="font-semibold text-xl text-slate-600">
                                             {user.name}
                                         </h3>
-                                        <p className="text-xs text-white/40">ID: {user.id}</p>
+                                        <p className="text-xs text-slate-400">ID: {user.id}</p>
                                     </div>
                                 </div>
                                 <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
                                     <button
                                         onClick={() => openEditModal(user)}
-                                        className="p-2 bg-yellow-500/20 text-yellow-300 rounded-lg hover:bg-yellow-500/30 transition"
+                                        className="p-2 bg-yellow-500/20 text-slate-600 rounded-lg hover:bg-yellow-500/30 transition"
                                     >
                                         <Pencil className="w-4 h-4" />
                                     </button>
                                     <button
                                         onClick={() => deleteMutation.mutate(user.id)}
-                                        className="p-2 bg-red-500/20 text-red-300 rounded-lg hover:bg-red-500/30 transition"
+                                        className="p-2 bg-red-500/20 text-slate-600 rounded-lg hover:bg-red-500/30 transition"
                                     >
                                         <Trash2 className="w-4 h-4" />
                                     </button>
@@ -329,46 +351,69 @@ const removeItemFromUser = (itemId: number) => {
                             </div>
 
                             <div className="space-y-2">
-                                <div className="flex items-center gap-2 text-white/60">
-                                    <Calendar className="w-4 h-4 text-purple-400" />
+                                <div className="flex items-center gap-2 text-slate-600">
+                                    <Calendar className="w-4 h-4" />
                                     <span className="text-sm">Дата рождения: {formatDate(user.birthDate)}</span>
                                 </div>
-                                <div className="flex items-center gap-2 text-white/60">
-                                    <Briefcase className="w-4 h-4 text-purple-400" />
-                                    <span className="text-sm">Группа: <span className="text-purple-300">{user.groupName}</span></span>
+                                <div className="flex items-center gap-2 text-slate-600">
+                                    <Briefcase className="w-4 h-4" />
+                                    <span className="text-sm">Группа: <span className="font-semibold">{user.groupName}</span></span>
                                 </div>
-                                <div className="flex items-center gap-2 text-white/60">
-                                    <BadgeCheck className="w-4 h-4 text-purple-400" />
-                                    <span className="text-sm">Роль: <span className="text-purple-300">{user.roleName}</span></span>
+                                <div className="flex items-center gap-2 text-slate-600">
+                                    <BadgeCheck className="w-4 h-4" />
+                                    <span className="text-sm">Роль: <span className="font-semibold">{user.roleName}</span></span>
                                 </div>
                             </div>
 
-                                <div className="mt-4 pt-3 border-t border-white/10">
-                                    <p className="text-sm text-white/40 flex items-center gap-1">
-                                        <CheckSquare className="w-4 h-4" />
-                                        Задач: <span className="text-purple-400 font-semibold">{user.items?.length || 0}</span>
-                                    </p>
-                                    <button
-                                        onClick={() => showUserItems(user)}
-                                        className="text-sm text-purple-400 hover:text-purple-300 transition flex items-center gap-1 mt-2"
-                                    >
-                                        <CheckSquare className="w-4 h-4" />
-                                        Управление задачами
-                                    </button>
-                                </div>
+                            <div className="mt-4 pt-3 border-t border-slate-300">
+                                <p className="text-sm text-slate-600 flex items-center gap-1">
+                                    <CheckSquare className="w-4 h-4" />
+                                    Задач: <span className="font-semibold">{user.items?.length || 0}</span>
+                                </p>
+                                <button
+                                    onClick={() => showUserItems(user)}
+                                    className="text-sm text-slate-600 hover:text-slate-800 transition flex items-center gap-1 mt-2"
+                                >
+                                    <CheckSquare className="w-4 h-4" />
+                                    Управление задачами
+                                </button>
+                            </div>
                         </motion.div>
                     ))}
                 </div>
 
                 {filteredUsers?.length === 0 && (
-                    <div className="bg-black/40 backdrop-blur-sm border border-purple-500/30 rounded-2xl p-12 text-center">
+                    <div className="bg-sky-100 backdrop-blur-sm border border-slate-500 rounded-2xl p-12 text-center">
                         <div className="text-6xl mb-4">👥</div>
-                        <h3 className="text-xl font-semibold text-white mb-2">Пользователи не найдены</h3>
-                        <p className="text-white/40">Попробуйте изменить параметры поиска</p>
+                        <h3 className="text-xl font-semibold text-slate-600 mb-2">Пользователи не найдены</h3>
+                        <p className="text-slate-500">Попробуйте изменить параметры поиска</p>
                     </div>
                 )}
 
-                {/* Modal */}
+                {/* Пагинация */}
+                {totalPages > 1 && (
+                    <div className="flex justify-center items-center gap-4 mt-8">
+                        <button
+                            onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
+                            disabled={currentPage === 0}
+                            className="px-4 py-2 bg-white/5 border border-slate-300 rounded-lg text-slate-600 disabled:opacity-30 hover:bg-slate-100 transition"
+                        >
+                            ← Предыдущая
+                        </button>
+                        <span className="text-slate-600">
+                            Страница {currentPage + 1} из {totalPages}
+                        </span>
+                        <button
+                            onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))}
+                            disabled={currentPage + 1 >= totalPages}
+                            className="px-4 py-2 bg-white/5 border border-slate-300 rounded-lg text-slate-600 disabled:opacity-30 hover:bg-slate-100 transition"
+                        >
+                            Следующая →
+                        </button>
+                    </div>
+                )}
+
+                {/* Модальное окно создания/редактирования */}
                 <Modal isOpen={isModalOpen} onClose={closeModal} title={editingId ? 'Редактирование пользователя' : 'Добавление пользователя'}>
                     <UserForm
                         initialData={editingId ? users?.find(u => u.id === editingId) : undefined}
@@ -379,50 +424,50 @@ const removeItemFromUser = (itemId: number) => {
                         isLoading={createMutation.isPending || updateMutation.isPending}
                     />
                 </Modal>
-                 {/* Modal for User Items management */}
-                                <Modal isOpen={showUserItemsModal} onClose={() => setShowUserItemsModal(false)} title={`Задачи пользователя: ${selectedUserForItems?.name}`} size="lg">
-                                    <div className="space-y-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-300 mb-2">Добавить задачу</label>
-                                            <select
-                                                value=""
-                                                onChange={(e) => {
-                                                    if (e.target.value) {
-                                                        addItemToUser(Number(e.target.value));
-                                                        e.target.value = '';
-                                                    }
-                                                }}
-                                                className="w-full px-3 py-2 bg-white/5 border border-purple-500/30 rounded-lg text-white focus:outline-none focus:border-purple-500"
-                                            >
-                                                <option value="">Выберите задачу</option>
-                                                {allItems.filter(i => !userItems.some(ui => ui.id === i.id)).map(item => (
-                                                    <option key={item.id} value={item.id}>{item.name}</option>
-                                                ))}
-                                            </select>
-                                        </div>
 
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-300 mb-2">Текущие задачи</label>
-                                            <div className="space-y-2">
-                                                {userItems.length === 0 ? (
-                                                    <p className="text-white/40 text-center py-4">Нет задач</p>
-                                                ) : (
-                                                    userItems.map(item => (
-                                                        <div key={item.id} className="flex justify-between items-center p-2 bg-white/5 rounded-lg">
-                                                            <span className="text-white">{item.name}</span>
-                                                            <button onClick={() => removeItemFromUser(item.id)} className="text-red-400 hover:text-red-300">✕</button>
-                                                        </div>
-                                                    ))
-                                                )}
-                                            </div>
+                {/* Модальное окно управления задачами пользователя */}
+                <Modal isOpen={showUserItemsModal} onClose={() => setShowUserItemsModal(false)} title={`Задачи пользователя: ${selectedUserForItems?.name}`} size="lg">
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">Доступные задачи</label>
+                            <div className="space-y-2 max-h-40 overflow-y-auto">
+                                {allItems.filter(i => !userItems.some(ui => ui.id === i.id)).length === 0 ? (
+                                    <p className="text-white/40 text-sm">Нет доступных задач</p>
+                                ) : (
+                                    allItems.filter(i => !userItems.some(ui => ui.id === i.id)).map(item => (
+                                        <button
+                                            key={item.id}
+                                            onClick={() => addItemToUser(item.id)}
+                                            className="w-full text-left px-3 py-2 bg-white/5 hover:bg-purple-500/30 rounded-lg text-white transition flex justify-between items-center group"
+                                        >
+                                            <span>{item.name}</span>
+                                            <span className="text-purple-400 opacity-0 group-hover:opacity-100">+ Добавить</span>
+                                        </button>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">Текущие задачи</label>
+                            <div className="space-y-2">
+                                {userItems.length === 0 ? (
+                                    <p className="text-white/40 text-center py-4">Нет задач</p>
+                                ) : (
+                                    userItems.map(item => (
+                                        <div key={item.id} className="flex justify-between items-center p-2 bg-white/5 rounded-lg">
+                                            <span className="text-white">{item.name}</span>
+                                            <button onClick={() => removeItemFromUser(item.id)} className="text-red-400 hover:text-red-300">✕</button>
                                         </div>
-
-                                        <div className="flex justify-end gap-3 pt-4">
-                                            <button onClick={() => setShowUserItemsModal(false)} className="px-4 py-2 bg-red-500/20 text-red-300 rounded-lg">Отмена</button>
-                                            <button onClick={saveUserItems} className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg">Сохранить</button>
-                                        </div>
-                                    </div>
-                                </Modal>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                        <div className="flex justify-end gap-3 pt-4">
+                            <button onClick={() => setShowUserItemsModal(false)} className="px-4 py-2 bg-red-500/20 text-red-300 rounded-lg">Отмена</button>
+                            <button onClick={saveUserItems} className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg">Сохранить</button>
+                        </div>
+                    </div>
+                </Modal>
             </div>
         </div>
     );

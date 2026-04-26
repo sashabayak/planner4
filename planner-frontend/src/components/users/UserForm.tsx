@@ -42,9 +42,9 @@ const UserForm: React.FC<UserFormProps> = ({
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 bg-sky-100 p-6 rounded-xl border border-slate-500 shadow-sm">
             <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-1">
+                <label htmlFor="name" className="block text-sm font-medium text-slate-600 mb-1">
                     Имя *
                 </label>
                 <input
@@ -53,13 +53,13 @@ const UserForm: React.FC<UserFormProps> = ({
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-3 py-2 bg-white/5 border border-purple-500/30 rounded-lg text-white focus:outline-none focus:border-purple-500 transition-all"
+                    className="w-full px-3 py-2 bg-white/50 border border-slate-300 rounded-lg text-slate-700 focus:outline-none focus:border-slate-500 transition-all"
                     placeholder="Иван Иванов"
                 />
             </div>
 
             <div>
-                <label htmlFor="birthDate" className="block text-sm font-medium text-gray-300 mb-1">
+                <label htmlFor="birthDate" className="block text-sm font-medium text-slate-600 mb-1">
                     Дата рождения *
                 </label>
                 <input
@@ -68,55 +68,89 @@ const UserForm: React.FC<UserFormProps> = ({
                     required
                     value={formData.birthDate}
                     onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
-                    className="w-full px-3 py-2 bg-white/5 border border-purple-500/30 rounded-lg text-white focus:outline-none focus:border-purple-500 transition-all"
+                    className="w-full px-3 py-2 bg-white/50 border border-slate-300 rounded-lg text-slate-700 focus:outline-none focus:border-slate-500 transition-all"
                 />
             </div>
 
             <div>
-                <label htmlFor="roleId" className="block text-sm font-medium text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-slate-600 mb-2">
                     Роль *
                 </label>
-                <select
-                    id="roleId"
-                    required
-                    value={formData.roleId}
-                    onChange={(e) => setFormData({ ...formData, roleId: Number(e.target.value) })}
-                    className="w-full px-3 py-2 bg-white/5 border border-purple-500/30 rounded-lg text-white focus:outline-none focus:border-purple-500 transition-all"
-                >
-                    <option value={0}>Выберите роль</option>
+                <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 bg-white/50 rounded-lg border border-slate-300">
+                    <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, roleId: 0 })}
+                        className={`px-3 py-2 rounded-lg text-sm transition ${
+                            formData.roleId === 0
+                                ? 'bg-slate-600 text-white'
+                                : 'bg-white text-slate-600 border border-slate-300 hover:bg-slate-100'
+                        }`}
+                    >
+                        Не выбрано
+                    </button>
                     {roles.map((role) => (
-                        <option key={role.id} value={role.id}>
+                        <button
+                            key={role.id}
+                            type="button"
+                            onClick={() => setFormData({ ...formData, roleId: role.id })}
+                            className={`px-3 py-2 rounded-lg text-sm transition ${
+                                formData.roleId === role.id
+                                    ? 'bg-slate-600 text-white'
+                                    : 'bg-white text-slate-600 border border-slate-300 hover:bg-slate-100'
+                            }`}
+                        >
                             {role.name}
-                        </option>
+                        </button>
                     ))}
-                </select>
+                </div>
             </div>
 
             <div>
-                <label htmlFor="groupId" className="block text-sm font-medium text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-slate-600 mb-2">
                     Группа *
                 </label>
-                <select
-                    id="groupId"
-                    required
-                    value={formData.groupId}
-                    onChange={(e) => setFormData({ ...formData, groupId: Number(e.target.value) })}
-                    className="w-full px-3 py-2 bg-white/5 border border-purple-500/30 rounded-lg text-white focus:outline-none focus:border-purple-500 transition-all"
-                >
-                    <option value={0}>Выберите группу</option>
+                <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 bg-white/50 rounded-lg border border-slate-300">
+                    <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, groupId: 0 })}
+                        className={`px-3 py-2 rounded-lg text-sm transition ${
+                            formData.groupId === 0
+                                ? 'bg-slate-600 text-white'
+                                : 'bg-white text-slate-600 border border-slate-300 hover:bg-slate-100'
+                        }`}
+                    >
+                        Не выбрано
+                    </button>
                     {groups.map((group) => (
-                        <option key={group.id} value={group.id}>
+                        <button
+                            key={group.id}
+                            type="button"
+                            onClick={() => setFormData({ ...formData, groupId: group.id })}
+                            className={`px-3 py-2 rounded-lg text-sm transition ${
+                                formData.groupId === group.id
+                                    ? 'bg-slate-600 text-white'
+                                    : 'bg-white text-slate-600 border border-slate-300 hover:bg-slate-100'
+                            }`}
+                        >
                             {group.name}
-                        </option>
+                        </button>
                     ))}
-                </select>
+                </div>
             </div>
 
             <div className="flex justify-end gap-3 pt-4">
-                <button type="button" onClick={onCancel} className="px-4 py-2 bg-red-500/20 text-red-300 rounded-lg hover:bg-red-500/30 transition">
+                <button
+                    type="button"
+                    onClick={onCancel}
+                    className="px-4 py-2 bg-red-500/20 text-red-600 rounded-lg hover:bg-red-500/30 transition"
+                >
                     Отмена
                 </button>
-                <button type="submit" disabled={isLoading} className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:opacity-90 transition disabled:opacity-50">
+                <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg transition disabled:opacity-50"
+                >
                     {isLoading ? 'Сохранение...' : 'Сохранить'}
                 </button>
             </div>
