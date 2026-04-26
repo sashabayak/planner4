@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';  // 🔹 добавили
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { userService } from '../services/userService';
@@ -8,34 +9,48 @@ import { itemService } from '../services/itemService';
 import { tagService } from '../services/tagService';
 import { Users, FolderKanban, BadgeCheck, CheckSquare, Tags, TrendingUp } from 'lucide-react';
 
-const StatCard: React.FC<{ label: string; value: string | number; icon: React.ElementType; delay: number; trend?: string }> =
-    ({ label, value, icon: Icon, delay, trend }) => {
-        return (
-            <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay, duration: 0.5 }}
-                whileHover={{ scale: 1.02, y: -5 }}
-                className="bg-sky-100 border border-slate-500 rounded-2xl p-6 cursor-pointer group shadow-sm"
-            >
-                <div className="flex items-center justify-between">
-                    <div>
-                        <p className="text-slate-500 text-sm">{label}</p>
-                        <p className="text-3xl font-bold text-slate-600 mt-2">{value}</p>
-                        {trend && (
-                            <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
-                                <TrendingUp className="w-3 h-3" />
-                                {trend}
-                            </p>
-                        )}
-                    </div>
-                    <div className="w-12 h-12 bg-slate-300 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <Icon className="w-6 h-6 text-slate-600" />
-                    </div>
-                </div>
-            </motion.div>
-        );
+// 🔹 Добавляем параметр `path` в интерфейс
+const StatCard: React.FC<{
+    label: string;
+    value: string | number;
+    icon: React.ElementType;
+    delay: number;
+    trend?: string;
+    path?: string;      // новый пропс – путь для перехода
+}> = ({ label, value, icon: Icon, delay, trend, path }) => {
+    const navigate = useNavigate();   // 🔹 для перехода
+
+    const handleClick = () => {
+        if (path) navigate(path);
     };
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay, duration: 0.5 }}
+            whileHover={{ scale: 1.02, y: -5 }}
+            onClick={handleClick}      // 🔹 добавили обработчик клика
+            className="bg-sky-100 border border-slate-500 rounded-2xl p-6 cursor-pointer group shadow-sm"
+        >
+            <div className="flex items-center justify-between">
+                <div>
+                    <p className="text-slate-500 text-sm">{label}</p>
+                    <p className="text-3xl font-bold text-slate-600 mt-2">{value}</p>
+                    {trend && (
+                        <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                            <TrendingUp className="w-3 h-3" />
+                            {trend}
+                        </p>
+                    )}
+                </div>
+                <div className="w-12 h-12 bg-slate-300 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Icon className="w-6 h-6 text-slate-600" />
+                </div>
+            </div>
+        </motion.div>
+    );
+};
 
 const Dashboard: React.FC = () => {
     const { data: users } = useQuery({ queryKey: ['users'], queryFn: userService.getAll });
@@ -44,12 +59,13 @@ const Dashboard: React.FC = () => {
     const { data: items } = useQuery({ queryKey: ['items'], queryFn: itemService.getAll });
     const { data: tags } = useQuery({ queryKey: ['tags'], queryFn: tagService.getAll });
 
+    // 🔹 добавили поле `path` для каждой карточки
     const stats = [
-        { label: 'Пользователей', value: users?.length || 0, icon: Users, delay: 0.1, trend: '+8%' },
-        { label: 'Групп', value: groups?.length || 0, icon: FolderKanban, delay: 0.2, trend: '+2' },
-        { label: 'Ролей', value: roles?.length || 0, icon: BadgeCheck, delay: 0.3, trend: '+1' },
-        { label: 'Задач', value: items?.length || 0, icon: CheckSquare, delay: 0.4, trend: '+15%' },
-        { label: 'Тегов', value: tags?.length || 0, icon: Tags, delay: 0.5, trend: '+5' },
+        { label: 'Пользователей', value: users?.length || 0, icon: Users, delay: 0.1, trend: '+8%', path: '/users' },
+        { label: 'Групп', value: groups?.length || 0, icon: FolderKanban, delay: 0.2, trend: '+2', path: '/groups' },
+        { label: 'Ролей', value: roles?.length || 0, icon: BadgeCheck, delay: 0.3, trend: '+1', path: '/roles' },
+        { label: 'Задач', value: items?.length || 0, icon: CheckSquare, delay: 0.4, trend: '+15%', path: '/items' },
+        { label: 'Тегов', value: tags?.length || 0, icon: Tags, delay: 0.5, trend: '+5', path: '/tags' },
     ];
 
     const completedItems = items?.filter(i => i.completed).length || 0;
@@ -80,17 +96,7 @@ const Dashboard: React.FC = () => {
                     transition={{ duration: 0.6 }}
                     className="text-center mb-12"
                 >
-                    <motion.div
-                        animate={{ scale: [1, 1.05, 1] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                        className="inline-block"
-                    >
-                        <div className="w-20 h-20 bg-slate-300 rounded-2xl flex items-center justify-center mx-auto border border-slate-500">
-                            <CheckSquare className="w-10 h-10 text-slate-600" />
-                        </div>
-                    </motion.div>
-                    <h1 className="text-4xl font-bold text-slate-600 mt-4">Панель управления</h1>
-                    <p className="text-slate-500 mt-2">Planner - управление пользователями и задачами</p>
+                    <h1 className="text-4xl font-bold text-slate-600 -mt-7">Панель управления</h1>
                 </motion.div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">

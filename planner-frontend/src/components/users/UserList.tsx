@@ -206,9 +206,9 @@ const UserList: React.FC = () => {
     return (
         <div className="min-h-screen pt-6 px-4">
             <div className="container mx-auto">
-                <div className="flex justify-between items-center mb-8 flex-wrap gap-4">
+                <div className="flex justify-between items-center mb-8 flex-wrap gap-4 -mt-12">
                     <div>
-                        <h1 className="text-4xl font-bold text-slate-600">Пользователи</h1>
+                        <h1 className="text-4xl font-bold text-slate-600 ">Пользователи</h1>
                         <p className="text-slate-600 mt-3 text-xl">Управление пользователями системы</p>
                     </div>
                     <button
@@ -324,14 +324,11 @@ const UserList: React.FC = () => {
                         >
                             <div className="flex items-center justify-between mb-4">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-slate-300">
-                                        <Users className="w-6 h-6 text-slate-600" />
-                                    </div>
+
                                     <div>
                                         <h3 className="font-semibold text-xl text-slate-600">
                                             {user.name}
                                         </h3>
-                                        <p className="text-xs text-slate-400">ID: {user.id}</p>
                                     </div>
                                 </div>
                                 <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
@@ -351,10 +348,6 @@ const UserList: React.FC = () => {
                             </div>
 
                             <div className="space-y-2">
-                                <div className="flex items-center gap-2 text-slate-600">
-                                    <Calendar className="w-4 h-4" />
-                                    <span className="text-sm">Дата рождения: {formatDate(user.birthDate)}</span>
-                                </div>
                                 <div className="flex items-center gap-2 text-slate-600">
                                     <Briefcase className="w-4 h-4" />
                                     <span className="text-sm">Группа: <span className="font-semibold">{user.groupName}</span></span>

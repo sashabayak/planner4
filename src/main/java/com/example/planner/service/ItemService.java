@@ -6,6 +6,7 @@ import com.example.planner.dto.item.ItemDTO;
 import com.example.planner.dto.item.ItemUpdateDTO;
 import com.example.planner.entity.Item;
 import com.example.planner.entity.Tag;
+import com.example.planner.entity.User;
 import com.example.planner.mapper.ItemMapper;
 import com.example.planner.repository.ItemRepository;
 
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import com.example.planner.repository.TagRepository;
+import com.example.planner.repository.UserRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
@@ -25,6 +27,7 @@ public class ItemService {
   private final ItemRepository repository;
   private final ItemMapper mapper;
   private final TagRepository tagRepository;
+  private final UserRepository userRepository;
 
   @PersistenceContext
   private EntityManager entityManager;
@@ -45,7 +48,20 @@ public class ItemService {
   @Transactional
   public ItemDTO createItem(ItemCreateDTO createDTO) {
 	Item item = mapper.toEntity(createDTO);
-	return mapper.toDto(repository.save(item));
+	Item saved = repository.save(item);
+	if (createDTO.getUserIds() != null && !createDTO.getUserIds().isEmpty()) {
+	  List<User> users = userRepository.findAllById(createDTO.getUserIds());
+	  saved.getUsers().addAll(users);
+	}
+	if (createDTO.getTagIds() != null && !createDTO.getTagIds().isEmpty()) {
+	  List<Tag> tags = tagRepository.findAllById(createDTO.getTagIds());
+	  saved.getTags().addAll(tags);
+	}
+	if ((createDTO.getUserIds() != null && !createDTO.getUserIds().isEmpty()) ||
+		(createDTO.getTagIds() != null && !createDTO.getTagIds().isEmpty())) {
+	  saved = repository.save(saved);
+	}
+	return mapper.toDto(saved);
   }
 
   @Transactional

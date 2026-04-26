@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { roleService } from '../../services/roleService';
@@ -17,6 +17,8 @@ const RoleList: React.FC = () => {
     const [showUsersModal, setShowUsersModal] = useState(false);
     const [roleUsers, setRoleUsers] = useState<User[]>([]);
     const [selectedRoleForUsers, setSelectedRoleForUsers] = useState<Role | null>(null);
+    const [currentPage, setCurrentPage] = useState(0);
+    const itemsPerPage = 9;
 
     const { showSuccess, showError } = useToast();
     const queryClient = useQueryClient();
@@ -95,12 +97,19 @@ const RoleList: React.FC = () => {
         role.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+    const totalPages = Math.ceil((filteredRoles?.length || 0) / itemsPerPage);
+    const paginatedRoles = filteredRoles?.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage);
+
+    useEffect(() => {
+        setCurrentPage(0);
+    }, [searchTerm]);
+
     if (isLoading) return <LoadingSpinner />;
 
     return (
         <div className="min-h-screen pt-6 px-4">
             <div className="container mx-auto">
-                <div className="flex justify-between items-center mb-8 flex-wrap gap-4">
+                <div className="flex justify-between items-center mb-8 flex-wrap gap-4 -mt-12">
                     <div>
                         <h1 className="text-4xl font-bold text-slate-600">Роли</h1>
                         <p className="text-slate-600 mt-3 text-xl">Управление ролями пользователей</p>
@@ -142,7 +151,7 @@ const RoleList: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredRoles?.map((role) => {
+                    {paginatedRoles?.map((role) => {
                         const usersCount = allUsers?.filter(u => u.roleId === role.id).length || 0;
                         return (
                             <motion.div
@@ -154,14 +163,10 @@ const RoleList: React.FC = () => {
                             >
                                 <div className="flex items-center justify-between mb-4">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-slate-300">
-                                            <BadgeCheck className="w-6 h-6 text-slate-600" />
-                                        </div>
                                         <div>
                                             <h3 className="font-semibold text-xl text-slate-600">
                                                 {role.name}
                                             </h3>
-                                            <p className="text-xs text-slate-400">ID: {role.id}</p>
                                         </div>
                                     </div>
                                     <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
@@ -206,6 +211,28 @@ const RoleList: React.FC = () => {
                         <div className="text-6xl mb-4">🏷️</div>
                         <h3 className="text-xl font-semibold text-slate-600 mb-2">Роли не найдены</h3>
                         <p className="text-slate-500">Создайте первую роль</p>
+                    </div>
+                )}
+
+                {totalPages > 1 && (
+                    <div className="flex justify-center items-center gap-4 mt-8">
+                        <button
+                            onClick={() => setCurrentPage(p => p - 1)}
+                            disabled={currentPage === 0}
+                            className="px-4 py-2 bg-white/5 border border-slate-300 rounded-lg text-slate-600 disabled:opacity-30 hover:bg-slate-100"
+                        >
+                            ← Предыдущая
+                        </button>
+                        <span className="text-slate-600">
+                            Страница {currentPage + 1} из {totalPages}
+                        </span>
+                        <button
+                            onClick={() => setCurrentPage(p => p + 1)}
+                            disabled={currentPage + 1 >= totalPages}
+                            className="px-4 py-2 bg-white/5 border border-slate-300 rounded-lg text-slate-600 disabled:opacity-30 hover:bg-slate-100"
+                        >
+                            Следующая →
+                        </button>
                     </div>
                 )}
 

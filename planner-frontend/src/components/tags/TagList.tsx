@@ -91,7 +91,7 @@ const TagList: React.FC = () => {
     return (
         <div className="min-h-screen pt-6 px-4">
             <div className="container mx-auto">
-                <div className="flex justify-between items-center mb-8 flex-wrap gap-4">
+                <div className="flex justify-between items-center mb-8 flex-wrap gap-4 -mt-12">
                     <div>
                         <h1 className="text-4xl font-bold text-slate-600">Теги</h1>
                         <p className="text-slate-600 mt-3 text-xl">Управление тегами для задач</p>
@@ -150,7 +150,6 @@ const TagList: React.FC = () => {
                                         <h3 className="font-semibold text-xl text-slate-600">
                                             #{tag.name}
                                         </h3>
-                                        <p className="text-xs text-slate-400">ID: {tag.id}</p>
                                     </div>
                                 </div>
                                 <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
@@ -174,30 +173,40 @@ const TagList: React.FC = () => {
                     </div>
                 )}
 
-                <Modal isOpen={isModalOpen} onClose={closeModal} title={selectedTag ? 'Редактирование тега' : 'Добавление тега'}>
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <div>
-                            <label htmlFor="tagName" className="block text-sm font-medium text-gray-300 mb-1">
-                                Название тега *
-                            </label>
-                            <input
-                                id="tagName"
-                                type="text"
-                                required
-                                value={formName}
-                                onChange={(e) => setFormName(e.target.value)}
-                                className="w-full px-3 py-2 bg-white/5 border border-purple-500/30 rounded-lg text-white focus:outline-none focus:border-purple-500 transition-all"
-                                placeholder="важный"
-                            />
-                        </div>
-                        <div className="flex justify-end gap-3 pt-4">
-                            <button type="button" onClick={closeModal} className="px-4 py-2 bg-red-500/20 text-red-300 rounded-lg">Отмена</button>
-                            <button type="submit" disabled={createMutation.isPending || updateMutation.isPending} className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg">
-                                {createMutation.isPending || updateMutation.isPending ? 'Сохранение...' : 'Сохранить'}
-                            </button>
-                        </div>
-                    </form>
-                </Modal>
+               <Modal isOpen={isModalOpen} onClose={closeModal} title={selectedTag ? 'Редактирование тега' : 'Добавление тега'}>
+                   <form onSubmit={handleSubmit} className="space-y-4">
+                       <div>
+                           <label htmlFor="tagName" className="block text-sm font-medium text-slate-600 mb-1">
+                               Название тега *
+                           </label>
+                           <input
+                               id="tagName"
+                               type="text"
+                               required
+                               value={formName}
+                               onChange={(e) => setFormName(e.target.value)}
+                               className="w-full px-3 py-2 bg-white/50 border border-slate-300 rounded-lg text-slate-700 focus:outline-none focus:border-slate-500 transition-all"
+                               placeholder="важный"
+                           />
+                       </div>
+                       <div className="flex justify-end gap-3 pt-4">
+                           <button
+                               type="button"
+                               onClick={closeModal}
+                               className="px-4 py-2 bg-red-500/20 text-red-600 rounded-lg hover:bg-red-500/30 transition"
+                           >
+                               Отмена
+                           </button>
+                           <button
+                               type="submit"
+                               disabled={createMutation.isPending || updateMutation.isPending}
+                               className="px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg transition disabled:opacity-50"
+                           >
+                               {createMutation.isPending || updateMutation.isPending ? 'Сохранение...' : 'Сохранить'}
+                           </button>
+                       </div>
+                   </form>
+               </Modal>
             </div>
         </div>
     );

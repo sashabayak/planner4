@@ -221,7 +221,7 @@ const ItemList: React.FC = () => {
     return (
         <div className="min-h-screen pt-6 px-4">
             <div className="container mx-auto">
-                <div className="flex justify-between items-center mb-8 flex-wrap gap-4 -mt-5">
+                <div className="flex justify-between items-center mb-8 flex-wrap gap-4 -mt-12">
                     <div>
                         <h1 className="text-4xl font-bold text-slate-600">
                             Задачи
@@ -303,7 +303,7 @@ const ItemList: React.FC = () => {
             <label className="block text-lg font-medium text-slate-600 mb-0">Тег:</label>
                 <select  value={selectedTagId ?? ''}
                                 onChange={(e) => setSelectedTagId(e.target.value ? Number(e.target.value) : null)}
-                                className="px-3 py-2 bg-white/5 border border-slate-300 rounded-lg text-slate-600 text-lg focus:outline-none focus:border-slate-500">
+                                className="w-full px-3 py-2 bg-white/5 border border-slate-300 rounded-lg text-slate-600 text-lg focus:outline-none focus:border-slate-500">
                     <option value="">Все теги</option>
                     {tags?.map(tag => <option key={tag.id} value={tag.id}>#{tag.name}</option>)}
                 </select>
@@ -430,7 +430,7 @@ const ItemList: React.FC = () => {
                                            <span className="text-[15px] text-slate-600 mt-1  max-w-[80px] text-center">
                                                {user.name}
                                            </span>
-                                           <span className="text-[12px] text-slate-600">{user.roleName}</span>
+                                           <span className="text-[14px] text-slate-600">{user.roleName}</span>
                                        </div>
                                     ))}
                                 </div>
@@ -473,109 +473,131 @@ const ItemList: React.FC = () => {
                 <Modal isOpen={isModalOpen} onClose={closeModal} title={selectedItem ? 'Редактирование задачи' : 'Добавление задачи'}>
                     <ItemForm
                         initialData={selectedItem || undefined}
+                        users={allUsers || []}
+                        tags={tags || []}
                         onSubmit={handleSubmit}
                         onCancel={closeModal}
                         isLoading={createMutation.isPending || updateMutation.isPending}
                     />
                 </Modal>
 
-                {/* Modal for Tags management */}
-                <Modal isOpen={showTagsModal} onClose={() => setShowTagsModal(false)} title={`Управление тегами: ${selectedItemForTags?.name}`} size="lg">
-                    <div className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Добавить тег</label>
-                            <div className="flex gap-2">
-                             <div className="space-y-2 max-h-40 overflow-y-auto">
-                                 <label className="block text-sm font-medium text-gray-300 mb-2">Доступные теги</label>
-                                 {allTags.filter(t => !itemTags.some(it => it.id === t.id)).length === 0 ? (
-                                     <p className="text-white/40 text-sm">Нет доступных тегов</p>
-                                 ) : (
-                                     allTags.filter(t => !itemTags.some(it => it.id === t.id)).map(tag => (
-                                         <button
-                                             key={tag.id}
-                                             onClick={() => addTagToItem(tag.id)}
-                                             className="w-full text-left px-3 py-2 bg-white/5 hover:bg-purple-500/30 rounded-lg text-white transition flex justify-between items-center group"
-                                         >
-                                             <span>#{tag.name}</span>
-                                             <span className="text-purple-400 opacity-0 group-hover:opacity-100">+ Добавить</span>
-                                         </button>
-                                     ))
-                                 )}
-                             </div>
+<Modal isOpen={showTagsModal} onClose={() => setShowTagsModal(false)} title={`Управление тегами: ${selectedItemForTags?.name}`} size="lg">
+    <div className="space-y-4">
+        {/* Блок добавления тега */}
+        <div>
+            <label className="block text-lg font-medium text-slate-600 mb-2">Добавить тег</label>
+            <div className="space-y-2 max-h-40 overflow-y-auto border border-slate-300 rounded-lg p-2 bg-white/50">
+                {allTags.filter(t => !itemTags.some(it => it.id === t.id)).length === 0 ? (
+                    <p className="text-slate-500 text-sm text-center py-4">Нет доступных тегов</p>
+                ) : (
+                    allTags.filter(t => !itemTags.some(it => it.id === t.id)).map(tag => (
+                        <button
+                            key={tag.id}
+                            onClick={() => addTagToItem(tag.id)}
+                            className="w-full text-left px-3 py-2 bg-slate-600 hover:bg-slate-500 text-white rounded-lg transition flex justify-between items-center group"
+                        >
+                            <span>#{tag.name}</span>
+                            <span className="text-slate-300 opacity-0 group-hover:opacity-100">+ Добавить</span>
+                        </button>
+                    ))
+                )}
+            </div>
+        </div>
+
+{/* Блок текущих тегов */}
+<div>
+    <label className="block text-lg font-medium text-slate-600 mb-2">Текущие теги</label>
+    <div className="flex flex-wrap gap-1.5 border border-slate-300 rounded-lg p-2 bg-white/50 min-h-[40px]">
+        {itemTags.length === 0 ? (
+            <p className="text-slate-500 text-xs w-full text-center py-1">Нет тегов</p>
+        ) : (
+            itemTags.map(tag => (
+                <div key={tag.id} className="flex items-center gap-0.5 px-1 py-0.5 border border-slate-400 rounded-md bg-white/30">
+                    <span className="text-xs text-slate-600">#{tag.name}</span>
+                    <button
+                        onClick={() => removeTagFromItem(tag.id)}
+                        className="text-red-400 hover:text-red-600 transition"
+                    >
+                        <X className="w-3 h-3" />
+                    </button>
+                </div>
+            ))
+        )}
+    </div>
+</div>
+
+        {/* Кнопка закрытия */}
+        <div className="flex justify-end gap-3 pt-4">
+            <button
+                onClick={() => setShowTagsModal(false)}
+                className="px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg transition"
+            >
+                Закрыть
+            </button>
+        </div>
+    </div>
+</Modal>
+
+{/* Modal for Users */}
+<Modal isOpen={showUsersModal} onClose={() => setShowUsersModal(false)} title={`Пользователи, связанные с задачей: ${selectedItemForUsers?.name}`} size="lg">
+    <div className="space-y-4">
+        {/* Блок добавления пользователя */}
+        <div>
+            <label className="block text-lg font-medium text-slate-600 mb-2">Добавить пользователя</label>
+            <div className="space-y-2 max-h-40 overflow-y-auto border border-slate-300 rounded-lg p-2 bg-white/50">
+                {allUsers?.filter(u => !itemUsers.some(iu => iu.id === u.id)).length === 0 ? (
+                    <p className="text-slate-500 text-center py-4">Нет доступных пользователей</p>
+                ) : (
+                    allUsers?.filter(u => !itemUsers.some(iu => iu.id === u.id)).map(user => (
+                        <button
+                            key={user.id}
+                            onClick={() => addUserToItem(user.id)}
+                            className="w-full text-left px-3 py-2 bg-slate-600 hover:bg-slate-500 text-white rounded-lg transition flex justify-between items-center group"
+                        >
+                            <span>{user.name}</span>
+                            <span className="text-slate-300 opacity-0 group-hover:opacity-100">+ Добавить</span>
+                        </button>
+                    ))
+                )}
+            </div>
+        </div>
+
+        {/* Блок текущих пользователей */}
+        <div>
+            <label className="block text-lg font-medium text-slate-600 mb-2">Текущие пользователи</label>
+            <div className="space-y-2 max-h-60 overflow-y-auto border border-slate-300 rounded-lg p-2 bg-white/50">
+                {itemUsers.length === 0 ? (
+                    <p className="text-slate-500 text-center py-4">Нет пользователей</p>
+                ) : (
+                    itemUsers.map(user => (
+                        <div key={user.id} className="flex justify-between items-center p-3 bg-white/80 rounded-lg shadow-sm">
+                            <div>
+                                <span className="font-medium text-slate-700">{user.name}</span>
+                                <p className="text-sm text-slate-500">{user.roleName} • {user.groupName}</p>
                             </div>
+                            <button
+                                onClick={() => removeUserFromItem(user.id)}
+                                className="text-red-500 hover:text-red-700 transition"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
                         </div>
+                    ))
+                )}
+            </div>
+        </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Текущие теги</label>
-                            <div className="flex flex-wrap gap-2">
-                                {itemTags.length === 0 ? (
-                                    <p className="text-white/40">Нет тегов</p>
-                                ) : (
-                                    itemTags.map(tag => (
-                                        <div key={tag.id} className="flex items-center gap-1 px-2 py-1 bg-purple-500/20 rounded-full">
-                                            <span className="text-purple-300 text-sm">#{tag.name}</span>
-                                            <button
-                                                onClick={() => removeTagFromItem(tag.id)}
-                                                className="text-red-400 hover:text-red-300"
-                                            >
-                                                <X className="w-3 h-3" />
-                                            </button>
-                                        </div>
-                                    ))
-                                )}
-                            </div>
-                        </div>
-
-                        <div className="flex justify-end gap-3 pt-4">
-                            <button onClick={() => setShowTagsModal(false)} className="px-4 py-2 bg-red-500/20 text-red-300 rounded-lg">Отмена</button>
-                        </div>
-                    </div>
-                </Modal>
-
-                {/* Modal for Users */}
-               <Modal isOpen={showUsersModal} onClose={() => setShowUsersModal(false)} title={`Пользователи, связанные с задачей: ${selectedItemForUsers?.name}`} size="lg">
-                   <div className="space-y-4">
-                       <div>
-                           <label className="block text-sm font-medium text-gray-300 mb-2">Добавить пользователя</label>
-                           <div className="space-y-2 max-h-40 overflow-y-auto">
-                               {allUsers.filter(u => !itemUsers.some(iu => iu.id === u.id)).length === 0 ? (
-                                   <p className="text-white/40 text-sm">Нет доступных пользователей</p>
-                               ) : (
-                                   allUsers.filter(u => !itemUsers.some(iu => iu.id === u.id)).map(user => (
-                                       <button
-                                           key={user.id}
-                                           onClick={() => addUserToItem(user.id)}
-                                           className="w-full text-left px-3 py-2 bg-white/5 hover:bg-purple-500/30 rounded-lg text-white transition flex justify-between items-center group"
-                                       >
-                                           <span>{user.name}</span>
-                                           <span className="text-purple-400 opacity-0 group-hover:opacity-100">+ Добавить</span>
-                                       </button>
-                                   ))
-                               )}
-                           </div>
-                       </div>
-
-                       <div>
-                           <label className="block text-sm font-medium text-gray-300 mb-2">Текущие пользователи</label>
-                           <div className="space-y-2">
-                               {itemUsers.length === 0 ? (
-                                   <p className="text-white/40 text-center py-4">Нет пользователей</p>
-                               ) : (
-                                   itemUsers.map(user => (
-                                       <div key={user.id} className="flex justify-between items-center p-2 bg-white/5 rounded-lg">
-                                           <span className="text-white">{user.name} — {user.roleName} ({user.groupName})</span>
-                                           <button onClick={() => removeUserFromItem(user.id)} className="text-red-400 hover:text-red-300">✕</button>
-                                       </div>
-                                   ))
-                               )}
-                           </div>
-                       </div>
-
-                       <div className="flex justify-end gap-3 pt-4">
-                           <button onClick={() => setShowUsersModal(false)} className="px-4 py-2 bg-red-500/20 text-red-300 rounded-lg">Закрыть</button>
-                       </div>
-                   </div>
-               </Modal>
+        {/* Кнопка закрытия */}
+        <div className="flex justify-end gap-3 pt-4">
+            <button
+                onClick={() => setShowUsersModal(false)}
+                className="px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg transition"
+            >
+                Закрыть
+            </button>
+        </div>
+    </div>
+</Modal>
             </div>
         </div>
     );

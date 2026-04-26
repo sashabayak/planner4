@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -18,5 +20,7 @@ public class ItemCreateDTO {
   private String description;
 
   private Boolean completed = false;
+  private List<Long> userIds;
+  private List<Integer> tagIds;
 
 }

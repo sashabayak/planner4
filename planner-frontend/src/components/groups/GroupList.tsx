@@ -101,7 +101,7 @@ const GroupList: React.FC = () => {
         <div className="min-h-screen pt-6 px-4">
             <div className="container mx-auto">
                 {/* Header */}
-                <div className="flex justify-between items-center mb-8 flex-wrap gap-4">
+                <div className="flex justify-between items-center mb-8 flex-wrap gap-4 -mt-12">
                     <div>
                         <h1 className="text-4xl font-bold text-slate-600">Группы</h1>
                         <p className="text-slate-600 mt-3 text-xl">Управление группами пользователей</p>
@@ -157,14 +157,10 @@ const GroupList: React.FC = () => {
                             >
                                 <div className="flex items-center justify-between mb-4">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-slate-300">
-                                            <FolderKanban className="w-6 h-6 text-slate-600" />
-                                        </div>
                                         <div>
                                             <h3 className="font-semibold text-xl text-slate-600">
                                                 {group.name}
                                             </h3>
-                                            <p className="text-xs text-slate-400">ID: {group.id}</p>
                                         </div>
                                     </div>
                                     <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">

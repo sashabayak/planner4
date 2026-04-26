@@ -59,6 +59,8 @@ export interface ItemCreateDto {
     name: string;
     description?: string;
     completed?: boolean;
+    userIds?: number[];
+    tagIds?: number[];
 }
 
 export interface ItemUpdateDto {
