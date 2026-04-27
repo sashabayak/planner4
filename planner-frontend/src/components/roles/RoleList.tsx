@@ -245,23 +245,22 @@ const RoleList: React.FC = () => {
                     />
                 </Modal>
 
-                <Modal isOpen={showUsersModal} onClose={() => setShowUsersModal(false)} title={`Пользователи с ролью: ${selectedRoleForUsers?.name}`} size="lg">
-                    <div className="space-y-3">
-                        {roleUsers.length === 0 ? (
-                            <p className="text-white/40 text-center py-8">Нет пользователей с этой ролью</p>
-                        ) : (
-                            roleUsers.map(user => (
-                                <div key={user.id} className="flex justify-between items-center p-3 bg-white/5 rounded-xl">
-                                    <div>
-                                        <p className="font-medium text-white">{user.name}</p>
-                                        <p className="text-sm text-white/40">{user.groupName}</p>
-                                    </div>
-                                    <span className="text-xs text-purple-400">ID: {user.id}</span>
-                                </div>
-                            ))
-                        )}
-                    </div>
-                </Modal>
+               <Modal isOpen={showUsersModal} onClose={() => setShowUsersModal(false)} title={`Пользователи с ролью: ${selectedRoleForUsers?.name}`} size="lg">
+                   <div className="space-y-3">
+                       {roleUsers.length === 0 ? (
+                           <p className="text-slate-500 text-center py-8">Нет пользователей с этой ролью</p>
+                       ) : (
+                           roleUsers.map(user => (
+                               <div key={user.id} className="flex justify-between items-center p-3 bg-white/80 rounded-xl border border-slate-300">
+                                   <div>
+                                       <p className="font-medium text-slate-700">{user.name}</p>
+                                       <p className="text-sm text-slate-500">{user.groupName}</p>
+                                   </div>
+                               </div>
+                           ))
+                       )}
+                   </div>
+               </Modal>
             </div>
         </div>
     );

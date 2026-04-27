@@ -154,7 +154,6 @@ const Dashboard: React.FC = () => {
                                             <p className={`font-medium ${item.completed ? 'text-green-600 line-through' : 'text-slate-600'}`}>
                                                 {item.name}
                                             </p>
-                                            <p className="text-xs text-slate-400">{formatDate(item.createdAt)}</p>
                                         </div>
                                         <span className={`text-xs px-2 py-1 rounded-full ${item.completed ? 'bg-green-200 text-green-700' : 'bg-yellow-200 text-yellow-700'}`}>
                                             {item.completed ? 'Выполнена' : 'Активна'}

@@ -30,6 +30,8 @@ public class UserMapper {
 		  .roleName(user.getRole().getName());
 	}
 
+	builder.itemsCount(user.getItems() != null ? user.getItems().size() : 0);
+
 	return builder.build();
   }
 

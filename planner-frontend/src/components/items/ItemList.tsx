@@ -555,6 +555,8 @@ const ItemList: React.FC = () => {
                             className="w-full text-left px-3 py-2 bg-slate-600 hover:bg-slate-500 text-white rounded-lg transition flex justify-between items-center group"
                         >
                             <span>{user.name}</span>
+                            <span className="text-xs text-slate-300">{user.roleName}</span>
+                            <span className="text-xs text-slate-300">{user.groupName}</span>
                             <span className="text-slate-300 opacity-0 group-hover:opacity-100">+ Добавить</span>
                         </button>
                     ))

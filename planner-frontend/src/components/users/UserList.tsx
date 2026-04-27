@@ -361,7 +361,7 @@ const UserList: React.FC = () => {
                             <div className="mt-4 pt-3 border-t border-slate-300">
                                 <p className="text-sm text-slate-600 flex items-center gap-1">
                                     <CheckSquare className="w-4 h-4" />
-                                    Задач: <span className="font-semibold">{user.items?.length || 0}</span>
+                                    Задач: <span className="text-slate-600 font-semibold">{user.itemsCount || 0}</span>
                                 </p>
                                 <button
                                     onClick={() => showUserItems(user)}
@@ -418,49 +418,69 @@ const UserList: React.FC = () => {
                     />
                 </Modal>
 
-                {/* Модальное окно управления задачами пользователя */}
-                <Modal isOpen={showUserItemsModal} onClose={() => setShowUserItemsModal(false)} title={`Задачи пользователя: ${selectedUserForItems?.name}`} size="lg">
-                    <div className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Доступные задачи</label>
-                            <div className="space-y-2 max-h-40 overflow-y-auto">
-                                {allItems.filter(i => !userItems.some(ui => ui.id === i.id)).length === 0 ? (
-                                    <p className="text-white/40 text-sm">Нет доступных задач</p>
-                                ) : (
-                                    allItems.filter(i => !userItems.some(ui => ui.id === i.id)).map(item => (
-                                        <button
-                                            key={item.id}
-                                            onClick={() => addItemToUser(item.id)}
-                                            className="w-full text-left px-3 py-2 bg-white/5 hover:bg-purple-500/30 rounded-lg text-white transition flex justify-between items-center group"
-                                        >
-                                            <span>{item.name}</span>
-                                            <span className="text-purple-400 opacity-0 group-hover:opacity-100">+ Добавить</span>
-                                        </button>
-                                    ))
-                                )}
-                            </div>
+{/* Модальное окно управления задачами пользователя */}
+<Modal isOpen={showUserItemsModal} onClose={() => setShowUserItemsModal(false)} title={`Задачи пользователя: ${selectedUserForItems?.name}`} size="lg">
+    <div className="space-y-4">
+        {/* Блок добавления задач */}
+        <div>
+            <label className="block text-lg font-medium text-slate-600 mb-2">Доступные задачи</label>
+            <div className="space-y-2 max-h-40 overflow-y-auto border border-slate-300 rounded-lg p-2 bg-white/50">
+                {allItems.filter(i => !userItems.some(ui => ui.id === i.id)).length === 0 ? (
+                    <p className="text-slate-500 text-sm text-center py-4">Нет доступных задач</p>
+                ) : (
+                    allItems.filter(i => !userItems.some(ui => ui.id === i.id)).map(item => (
+                        <button
+                            key={item.id}
+                            onClick={() => addItemToUser(item.id)}
+                            className="w-full text-left px-3 py-2 bg-slate-600 hover:bg-slate-500 text-white rounded-lg transition flex justify-between items-center group"
+                        >
+                            <span>{item.name}</span>
+                            <span className="text-slate-300 opacity-0 group-hover:opacity-100">+ Добавить</span>
+                        </button>
+                    ))
+                )}
+            </div>
+        </div>
+
+        {/* Блок текущих задач */}
+        <div>
+            <label className="block text-lg font-medium text-slate-600 mb-2">Текущие задачи</label>
+            <div className="space-y-2 max-h-60 overflow-y-auto border border-slate-300 rounded-lg p-2 bg-white/50">
+                {userItems.length === 0 ? (
+                    <p className="text-slate-500 text-center py-4">Нет задач</p>
+                ) : (
+                    userItems.map(item => (
+                        <div key={item.id} className="flex justify-between items-center p-3 bg-white/80 rounded-lg shadow-sm">
+                            <span className="font-medium text-slate-700">{item.name}</span>
+                            <button
+                                onClick={() => removeItemFromUser(item.id)}
+                                className="text-red-500 hover:text-red-700 transition"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
                         </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Текущие задачи</label>
-                            <div className="space-y-2">
-                                {userItems.length === 0 ? (
-                                    <p className="text-white/40 text-center py-4">Нет задач</p>
-                                ) : (
-                                    userItems.map(item => (
-                                        <div key={item.id} className="flex justify-between items-center p-2 bg-white/5 rounded-lg">
-                                            <span className="text-white">{item.name}</span>
-                                            <button onClick={() => removeItemFromUser(item.id)} className="text-red-400 hover:text-red-300">✕</button>
-                                        </div>
-                                    ))
-                                )}
-                            </div>
-                        </div>
-                        <div className="flex justify-end gap-3 pt-4">
-                            <button onClick={() => setShowUserItemsModal(false)} className="px-4 py-2 bg-red-500/20 text-red-300 rounded-lg">Отмена</button>
-                            <button onClick={saveUserItems} className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg">Сохранить</button>
-                        </div>
-                    </div>
-                </Modal>
+                    ))
+                )}
+            </div>
+        </div>
+
+        {/* Кнопки действий */}
+        <div className="flex justify-end gap-3 pt-4">
+            <button
+                onClick={() => setShowUserItemsModal(false)}
+                className="px-4 py-2 bg-red-500/20 text-red-600 rounded-lg hover:bg-red-500/30 transition"
+            >
+                Отмена
+            </button>
+            <button
+                onClick={saveUserItems}
+                className="px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg transition"
+            >
+                Сохранить
+            </button>
+        </div>
+    </div>
+</Modal>
             </div>
         </div>
     );

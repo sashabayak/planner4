@@ -219,23 +219,22 @@ const GroupList: React.FC = () => {
                 </Modal>
 
                 {/* Модальное окно участников группы */}
-                <Modal isOpen={showUsersModal} onClose={() => setShowUsersModal(false)} title={`Участники группы: ${selectedGroupForUsers?.name}`} size="lg">
-                    <div className="space-y-3">
-                        {groupUsers.length === 0 ? (
-                            <p className="text-white/40 text-center py-8">В этой группе нет пользователей</p>
-                        ) : (
-                            groupUsers.map(user => (
-                                <div key={user.id} className="flex justify-between items-center p-3 bg-white/5 rounded-xl">
-                                    <div>
-                                        <p className="font-medium text-white">{user.name}</p>
-                                        <p className="text-sm text-white/40">{user.roleName}</p>
-                                    </div>
-                                    <span className="text-xs text-purple-400">ID: {user.id}</span>
-                                </div>
-                            ))
-                        )}
-                    </div>
-                </Modal>
+              <Modal isOpen={showUsersModal} onClose={() => setShowUsersModal(false)} title={`Участники группы: ${selectedGroupForUsers?.name}`} size="lg">
+                  <div className="space-y-3">
+                      {groupUsers.length === 0 ? (
+                          <p className="text-slate-500 text-center py-8">В этой группе нет пользователей</p>
+                      ) : (
+                          groupUsers.map(user => (
+                              <div key={user.id} className="flex justify-between items-center p-3 bg-white/80 rounded-xl border border-slate-300">
+                                  <div>
+                                      <p className="font-medium text-slate-700">{user.name}</p>
+                                      <p className="text-sm text-slate-500">{user.roleName}</p>
+                                  </div>
+                              </div>
+                          ))
+                      )}
+                  </div>
+              </Modal>
             </div>
         </div>
     );

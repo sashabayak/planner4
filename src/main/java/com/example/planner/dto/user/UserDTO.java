@@ -21,4 +21,5 @@ public class UserDTO {
   private String roleName;
   private long groupId;
   private String groupName;
+  private int itemsCount;
 }
