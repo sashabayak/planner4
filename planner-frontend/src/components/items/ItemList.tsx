@@ -265,7 +265,7 @@ const ItemList: React.FC = () => {
                     className={`px-3 py-2 rounded-lg text-s font-medium transition-all duration-200 ${
                         statusFilter === 'active'
                             ? 'bg-slate-600 text-white border-2 border-slate-600'
-                            : 'bg-transparent text-slate-600 border-2 border-slate-400 hover:bg-slate-600'
+                            : 'bg-transparent text-slate-600 border-2 border-slate-400 hover:bg-slate-600 hover:text-white'
                     }`}
                 >
                     Активные
@@ -276,7 +276,7 @@ const ItemList: React.FC = () => {
                     className={`px-3 py-2 rounded-lg text-s font-medium transition-all duration-200 ${
                         statusFilter === 'completed'
                             ? 'bg-slate-600 text-white border-2 border-slate-600'
-                            : 'bg-transparent text-slate-600 border-2 border-slate-400 hover:bg-slate-600'
+                            : 'bg-transparent text-slate-600 border-2 border-slate-400 hover:bg-slate-600 hover:text-white'
                     }`}
                 >
                     Выполненные

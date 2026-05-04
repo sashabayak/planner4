@@ -16,10 +16,10 @@ const Navbar: React.FC = () => {
 
     const navItems = [
         { path: '/', label: 'Дашборд', icon: LayoutDashboard },
+        { path: '/items', label: 'Задачи', icon: CheckSquare },
         { path: '/users', label: 'Пользователи', icon: Users },
         { path: '/groups', label: 'Группы', icon: FolderKanban },
         { path: '/roles', label: 'Роли', icon: BadgeCheck },
-        { path: '/items', label: 'Задачи', icon: CheckSquare },
         { path: '/tags', label: 'Теги', icon: Tags },
     ];
 
