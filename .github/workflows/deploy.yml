@@ -16,7 +16,6 @@ jobs:
           distribution: 'temurin'
       - name: Run tests
         run: mvn test
-        working-directory: planner
 
   healthcheck:
     runs-on: ubuntu-latest
