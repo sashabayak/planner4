@@ -3,10 +3,12 @@ name: CI/CD
 on:
   push:
     branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    # НЕ НУЖНО working-directory
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 17
@@ -15,7 +17,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - name: Run tests
-        run: mvn test
+        run: mvn test   # mvn теперь видит pom.xml прямо в корне
 
   healthcheck:
     runs-on: ubuntu-latest
