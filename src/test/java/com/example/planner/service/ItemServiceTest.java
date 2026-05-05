@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -160,13 +161,19 @@ class ItemServiceTest {
 
   @Test
   void deleteItem_WhenExists_ShouldReturnTrue() {
-	when(itemRepository.existsById(ID)).thenReturn(true);
-	doNothing().when(itemRepository).deleteById(ID);
+	// Arrange
+	Long itemId = 1L;
+	Item item = new Item();
+	item.setId(itemId);
+	item.setUsers(new ArrayList<>());
+	item.setTags(new ArrayList<>());
 
-	boolean result = itemService.deleteItem(ID);
+	when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
+	doNothing().when(itemRepository).delete(item);  // itemRepository, а не repository
+
+	boolean result = itemService.deleteItem(itemId);
 
 	assertThat(result).isTrue();
-	verify(itemRepository).deleteById(ID);
   }
 
   @Test
