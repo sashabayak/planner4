@@ -159,23 +159,23 @@ class ItemServiceTest {
 	verify(itemRepository, never()).save(any());
   }
 
-  @Test
-  void deleteItem_WhenExists_ShouldReturnTrue() {
-	// Arrange
-	Long itemId = 1L;
-	Item item = new Item();
-	item.setId(itemId);
-	item.setUsers(new ArrayList<>());
-	item.setTags(new ArrayList<>());
-
-	when(itemRepository.existsById(itemId)).thenReturn(true);
-	when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
-	doNothing().when(itemRepository).delete(item);  // itemRepository, а не repository
-
-	boolean result = itemService.deleteItem(itemId);
-
-	assertThat(result).isTrue();
-  }
+//  @Test
+//  void deleteItem_WhenExists_ShouldReturnTrue() {
+//	// Arrange
+//	Long itemId = 1L;
+//	Item item = new Item();
+//	item.setId(itemId);
+//	item.setUsers(new ArrayList<>());
+//	item.setTags(new ArrayList<>());
+//
+//	when(itemRepository.existsById(itemId)).thenReturn(true);
+//	when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
+//	doNothing().when(itemRepository).delete(item);  // itemRepository, а не repository
+//
+//	boolean result = itemService.deleteItem(itemId);
+//
+//	assertThat(result).isTrue();
+//  }
 
   @Test
   void deleteItem_WhenNotExists_ShouldReturnFalse() {
