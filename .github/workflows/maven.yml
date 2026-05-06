@@ -46,7 +46,7 @@ jobs:
       env:
         SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/plannerdb
         SPRING_DATASOURCE_USERNAME: postgres
-        SPRING_DATASOURCE_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        SPRING_DATASOURCE_PASSWORD: postgres
     
     - name: SonarCloud Scan
       run: mvn -B sonar:sonar
@@ -55,7 +55,7 @@ jobs:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/plannerdb
         SPRING_DATASOURCE_USERNAME: postgres
-        SPRING_DATASOURCE_PASSWORD:
+        SPRING_DATASOURCE_PASSWORD: postgres
     
     - name: Upload JAR artifact
       uses: actions/upload-artifact@v6
