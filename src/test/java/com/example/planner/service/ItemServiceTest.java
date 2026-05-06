@@ -168,6 +168,7 @@ class ItemServiceTest {
 	item.setUsers(new ArrayList<>());
 	item.setTags(new ArrayList<>());
 
+	when(itemRepository.existsById(itemId)).thenReturn(true);
 	when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
 	doNothing().when(itemRepository).delete(item);  // itemRepository, а не repository
 
