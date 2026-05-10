@@ -7,7 +7,7 @@ on:
 
 env:
   IMAGE_NAME: ${{ secrets.DOCKER_USERNAME }}/planner:latest
-  APP_BASE_URL: https://planner-api-mwez.onrender.com
+  APP_BASE_URL: https://planner4.up.railway.app
 
 jobs:
   build-and-test:
@@ -40,6 +40,10 @@ jobs:
 
       - name: Build and Test
         run: mvn -B clean verify
+        env:
+          DB_URL: ${{ vars.POSTGRES_URL }}
+          DB_USERNAME: ${{ vars.POSTGRES_USER }}
+          DB_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
 
   docker-build-push:
     needs: build-and-test
@@ -61,12 +65,15 @@ jobs:
   deploy:
     needs: docker-build-push
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
     steps:
-      - name: Deploy Backend
-        run: curl -f ${{ secrets.RENDER_BACKEND_HOOK }}
-
-      - name: Deploy Frontend
-        run: curl -f ${{ secrets.RENDER_FRONTEND_HOOK }}
+      - uses: actions/checkout@v5
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      - name: Deploy to Railway
+        run: railway up --detach
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
   healthcheck:
     needs: deploy
