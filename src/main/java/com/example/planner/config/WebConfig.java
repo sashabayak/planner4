@@ -1,4 +1,3 @@
-// src/main/java/com/example/planner/config/WebConfig.java
 package com.example.planner.config;
 
 import org.springframework.context.annotation.Configuration;
