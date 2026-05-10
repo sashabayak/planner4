@@ -7,7 +7,7 @@ on:
 
 env:
   IMAGE_NAME: ${{ secrets.DOCKER_USERNAME }}/planner:latest
-  APP_BASE_URL: https://planner-api-mwez.onrender.com/api
+  APP_BASE_URL: https://planner-api-mwez.onrender.com
 
 jobs:
   build-and-test:
