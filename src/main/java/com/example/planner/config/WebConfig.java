@@ -10,9 +10,8 @@ public class WebConfig implements WebMvcConfigurer {
   @Override
   public void addCorsMappings(CorsRegistry registry) {
 	registry.addMapping("/**")
-		.allowedOrigins(            "http://localhost:3000",
-			"https://planner-frontend-njnq.onrender.com",
-			"https://planner4-production.up.railway.app")
+		.allowedOrigins("http://localhost:3000",
+			"https://planner-frontend-njnq.onrender.com")
 		.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
 		.allowedHeaders("*")
 		.allowCredentials(true);
